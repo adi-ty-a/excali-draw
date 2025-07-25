@@ -6,11 +6,11 @@ import { Request,Response,NextFunction} from "express";
 // }
 
 type decode ={
-    id:string 
+    id:number 
 }
 
 export function Middleware(req : Request,res:Response,next : NextFunction){
-    const token = req.headers.authentication ?? "";
+    const token = req.headers.authorization?? "";
     const decoded :decode = jwt.verify(token as string, process.env.JWT_SECRET as string) as decode
     if(decoded){
         req.userid = decoded.id ;

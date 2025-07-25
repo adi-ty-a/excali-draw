@@ -12,14 +12,19 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@repo/db": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "@types/bcrypt": "^6.0.0",
+    "@types/dotenv": "^8.2.3",
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
+    "bcrypt": "^6.0.0",
+    "dotenv": "^17.2.0",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "ws": "^8.18.3"
   },
   "devDependencies": {
-    "@repo/common-package":"workspace:*"
+    "@repo/common-package": "workspace:*"
   }
 }
