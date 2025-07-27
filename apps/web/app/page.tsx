@@ -5,4 +5,4 @@ export default function Home(){
     hellow
     <Input_box/>
   </div>
-}
+} 
