@@ -1,17 +1,13 @@
-"use client"
-import intindraw from "@/draw/draw";
-import { useEffect, useRef } from "react";
+import { Roomcanvas } from "@/components/Room";
 
-export default function Canvas(){
+type param= Promise<{ roomid: string }>
 
-    const usecanvas = useRef<HTMLCanvasElement>(null);
-    useEffect(()=>{
-        if(usecanvas.current){
-            intindraw(usecanvas.current);
-                }
-            },[usecanvas])
-    return <>
-    <div>
-        <canvas ref={usecanvas} width={1000} height={1000}></canvas>
-    </div></>
+export default async function Canvas({
+    params
+}:{
+    params:param
+}){
+    const {roomid} = await params;
+    console.log(roomid);
+    return <Roomcanvas roomid={roomid} />
 }

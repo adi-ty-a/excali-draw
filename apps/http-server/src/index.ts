@@ -4,11 +4,13 @@ import { Middleware } from "./middleware";
 import {CreateRoomSchema, CreateUserSchema, SiginSchema} from "@repo/common-package/types"
 import {prismaClient} from "@repo/db/clients"
 import * as bcrypt from "bcrypt";
+import cors from "cors"
 require('dotenv').config();
 const app = express();
 const saltRounds = 3;
 
 app.use(express.json())
+app.use(cors());
 
 app.post("/signUp",async(req,res)=>{
 

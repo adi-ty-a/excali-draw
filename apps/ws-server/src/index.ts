@@ -63,7 +63,7 @@ wss.on('connection', function connection(ws,request) {
   }
 
   if(parsedData.type == "chat"){
-    const roomId = parsedData.room
+    const roomId = parsedData.roomId
     const message = parsedData.message
     const roomno = Number(roomId)
     console.log(typeof roomno);
