@@ -1,4 +1,5 @@
 import axios from "axios"
+import { RefObject } from "react";
 
 type shapes ={
     type:"rect",
@@ -10,12 +11,14 @@ type shapes ={
     type:"circle",
     x:number,
     y:number,
-    raidus:number
-}
+    raidus:number,
+    startangle:0,
+    endangle:6.28
+} 
 
-export default async function intindraw(canvas:HTMLCanvasElement,roomId:string,WebSocket:WebSocket){
-    console.log(roomId);
-    const existing: shapes[] = await getExistingshapes(roomId); 
+export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,WebSocket:WebSocket,tool:RefObject<string>){
+    console.log(tool.current);
+    const existing: shapes[] =  await getExistingshapes(roomId); 
     console.log(existing);
 
     if(canvas){
@@ -53,28 +56,54 @@ export default async function intindraw(canvas:HTMLCanvasElement,roomId:string,W
              clicked = false
              const width = e.clientX-startx;
              const height = e.clientY-starty;
-             const shape:shapes = {
-                type:"rect",
-                x:startx,
-                y:starty,
-                height,
-                width
+             const radius = width/2;
+             let shape:shapes |null = null;
+             if(tool.current == "circle"){
+                 shape = {
+                    type:"circle",
+                    x:startx,
+                    y:starty,
+                    raidus:radius,
+                    startangle:0,
+                    endangle:6.28
+                 } 
              }
-             existing.push(shape);
-             WebSocket.send(JSON.stringify({
-                type:"chat",
-                message:JSON.stringify({shape}),
-                roomId
-             }));
+             else if(tool.current == "rec"){
+                 shape = {
+                    type:"rect",
+                    x:startx,
+                    y:starty,
+                    height,
+                    width
+                 }
+             }
+            if(shape){
+                existing.push(shape);
+                WebSocket.send(JSON.stringify({
+                   type:"chat",
+                   message:JSON.stringify({shape}),
+                   roomId
+                }));
+            }
+             
 
         })
         canvas.addEventListener("mousemove",(e)=>{
             if(clicked){
                 const width = e.clientX-startx;
                 const height = e.clientY-starty;
+                const raidus = width/2;
                 clearcanvas(existing,canvas,ctx)
                 ctx.strokeStyle = "rgb(255,255,255)";
-                ctx.strokeRect(startx,starty,width,height);
+
+                if(tool.current == "rec"){
+                    ctx.strokeRect(startx,starty,width,height);
+                }
+                else if(tool.current == "circle"){
+                    ctx.beginPath();
+                    ctx.arc(startx,starty,Math.abs(raidus),0, 6.28);
+                    ctx.stroke();
+                }
             }
         }) 
 }
@@ -85,9 +114,16 @@ function clearcanvas(exisitingshapes:shapes[], canvas:HTMLCanvasElement ,ctx:Can
     ctx.fillStyle ="rgb(0,0,0)";
     ctx.fillRect(0,0,canvas.width,canvas.height);
     exisitingshapes.map((shapes)=>{
+    
         if(shapes.type == "rect"){
             ctx.strokeStyle = "rgb(255,255,255)";
         ctx.strokeRect(shapes.x,shapes.y,shapes.width,shapes.height);
+        }
+        else if(shapes.type == "circle"){
+            ctx.strokeStyle = "rgb(255,255,255)";
+            ctx.beginPath();
+            ctx.arc(shapes.x,shapes.y,Math.abs(shapes.raidus),0,6.28);
+            ctx.stroke();
         }
     })
 }
