@@ -2,10 +2,11 @@ import { WebSocketServer } from 'ws';
 import Jwt, { JwtPayload }  from 'jsonwebtoken';
 import WebSocket from 'ws';
 import {prismaClient} from "@repo/db/clients"
+import { json } from 'express';
 require('dotenv').config();
 interface user{
   ws:WebSocket,
-  rooms:String[],
+  rooms:number[],
   userId:number
 }
 
@@ -34,10 +35,14 @@ wss.on('connection', function connection(ws,request) {
     
     const queryurl = new URLSearchParams(url.split("?")[1]);
     const token = queryurl.get("token") || "";
+    if(!token){
+      ws.close()
+      return 
+    }
     const userId = checkuser(token)
     if(!userId){
       ws.close();
-      return null
+      return 
     }
     
   users.push({
@@ -48,10 +53,15 @@ wss.on('connection', function connection(ws,request) {
   
   ws.on('message', async function message(data) {
   const parsedData = JSON.parse(data as unknown as string);
+  console.log(parsedData);
+    console.log(users);
 
   if(parsedData.type == "join_room"){
     const user = users.find(x => x.ws == ws)
-    user?.rooms.push(parsedData.room);
+    if(user){
+    const room = Number(parsedData.room)
+    user?.rooms.push(room);
+    }
   }
 
   if(parsedData.type == "leave_room"){
@@ -59,25 +69,25 @@ wss.on('connection', function connection(ws,request) {
     if(!user){
       return
     }
-    user?.rooms.filter(x => x == parsedData.room);
+      const room = Number(parsedData.room)
+    user.rooms = user?.rooms.filter(x => x !== room);
   }
 
   if(parsedData.type == "chat"){
-    const roomId = parsedData.roomId
+    const roomId = parsedData.room
     const message = parsedData.message
     const roomno = Number(roomId)
-    console.log(typeof roomno);
+    console.log(roomno);
     await prismaClient.chat.create({
       data:{
         roomid:roomno,
         message:message,
         userId
-
       }
     })
 
     users.forEach(user =>{
-      if(user.rooms.includes(roomId)){
+      if(user.rooms.includes(roomno)){
         user.ws.send(JSON.stringify({
           type:"chat",
           roomId:roomId,

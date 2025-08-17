@@ -1,10 +1,17 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Mochiy_Pop_One } from "next/font/google";
+
 import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+});
+
+const mochiy = Mochiy_Pop_One({
+  weight: "400", // only one weight available
+  subsets: ["latin"],
+  variable: "--font-mochiy",
 });
 
 const geistMono = Geist_Mono({
@@ -25,7 +32,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${mochiy.variable} ${geistMono.variable} antialiased`}
       >
         {children}
       </body>
