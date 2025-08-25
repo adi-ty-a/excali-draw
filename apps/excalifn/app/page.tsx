@@ -7,6 +7,7 @@ import picture from "../assets/Playboard.svg"
 import { SiInstagram } from "react-icons/si";
 import { SlSocialTwitter } from "react-icons/sl";
 import { TbBrandLinkedin } from "react-icons/tb";
+import { Button } from "@/components/Button";
 const mochiy = Mochiy_Pop_One({
   weight: "400", // only one weight available
   subsets: ["latin"],
@@ -22,6 +23,7 @@ const outfit = Outfit({
 export default function Home(){
 
     const parent ={
+        initial:{opacity: 1},
         visible:{
             transition:{
                 staggerChildren:0.2,
@@ -49,32 +51,23 @@ export default function Home(){
       <div className="absolute  right-[275px]  w-[1px] h-[1701px] bg-gray-300 opacity-10"></div>
       <div className="absolute -z-20 w-full h-[1701px] bg-gradient-to-b from-[#120066] from-[-54.58%] to-black"></div>
       <div
-    className=" w-full h-[1701px]  flex flex-col  items-center justify-between ">
-        <div>
-        <div className="w-[1280px] h-[56px] mt-4 flex items-center justify-between px-2">
+        className=" w-full h-[1701px]  flex flex-col  items-center justify-between ">
+        <div className="flex flex-col  items-center justify-between">
+        <div className="w-[1300px] h-[56px] mt-4 flex items-center justify-between px-2">
             <div className="w-[120px] drop-shadow-md">
             <h1 className={`${mochiy.className} text-2xl`} >Playboard</h1>
             </div>
-            <div className="w-[650px] h-[50px] p-[2px]  bg-linear-to-b from-[#2300C3] to-[#02000A] rounded-full drop-shadow-lg">
-            <div className="w-[650px] h-[50px] flex items-center  justify-around px-5 rounded-full  bg-[linear-gradient(0deg,#281191_-117.86%,#000000_130.36%)]">
+            <div className="w-[550px] h-[45px] p-[2px]  bg-linear-to-b from-[#2300C3] to-[#02000A] rounded-full drop-shadow-lg">
+            <div className="w-[550px] h-[45px] flex items-center  justify-around px-5 rounded-full  bg-[linear-gradient(0deg,#281191_-117.86%,#000000_130.36%)]">
                 <Link href="/dashboard" className=" hover:drop-shadow-[0_0_10px_rgba(0,115,255,0.9)] transition duration-300 ">Home</Link>
                 <Link href="/dashboard" className=" hover:drop-shadow-[0_0_10px_rgba(0,115,255,0.9)] transition duration-300 ">Product</Link>
                 <Link href="/dashboard" className=" hover:drop-shadow-[0_0_10px_rgba(0,115,255,0.9)] transition duration-300 ">About</Link>
             </div>
             </div>
-            <div className="w-[120px]">
-            <motion.button 
-            whileHover={{
-                scale:1.05,
-            }}
-            transition={{
-                duration:.2
-            }}
-            className="flex flex-row justify-center items-center p-[10px] gap-[10px] 
-             w-[100px] h-[39px] 
-             bg-gradient-to-b from-[#2E00FF] to-[#13006C] 
-             drop-shadow-md rounded-[15px] hover:from-[#0073ff] hover:to-[#003473]
-             flex-none order-2 grow-0">SignUp</motion.button>
+            <div className="w-[135px]">
+                <Link rel="stylesheet" href="/Signup">
+            <Button btnscale={true} btnsize="small" prop="blue" content="SignUp"/>
+                </Link>
             </div>
         </div>
     <motion.div 
@@ -82,18 +75,12 @@ export default function Home(){
     initial="initial"
     animate="visible"
     >
-    <motion.div variants={parent} className="mt-45 flex flex-col items-center">
-        <motion.h1 variants={child} className={` text-[49px] ${outfit.className} font-bold relative z-10`}>Sketch, Share, and Build Together</motion.h1>
+    <motion.div variants={parent} className="mt-30 flex flex-col items-center">
+        <motion.h1 variants={child} className={` text-[42px] ${outfit.className} font-bold relative z-10`}>Sketch, Share, and Build Together</motion.h1>
         <motion.h2 variants={child} className={`${outfit.className} text-[20px]`}>Collaborate live on the same canvas with anyone</motion.h2>
     </motion.div>
         <motion.div variants={child} className="mt-10 flex z-10 flex-col items-center">
-            <button className={`flex flex-row justify-center items-center p-[10px] gap-[10px] 
-             w-[210px] h-[52px] relative 
-             bg-gradient-to-b from-[#D800FF] to-[#8E009B] 
-             drop-shadow-md rounded-[12px] z-10    shadow-[0_0_20px_rgba(216,0,255,0.7)]
-             flex-none order-2 grow-0 text-xl font-medium text-shadow-white border-b-[1px] border-r border-l border-white ${outfit.className}`}>
-            Start Board
-            </button>
+            <Button btnscale={true} btnsize="medium" prop="pink" content="Start board" />
         </motion.div>
         <motion.div 
         variants={child}
@@ -107,13 +94,13 @@ export default function Home(){
         <div className="w-full h-[250px] bg-gradient-to-b from-black flex items-center justify-center to-[#120066]">
             <div className="w-[1280px] h-[56px] mt-4 flex items-center justify-between px-2">
             <div className="w-[120px] drop-shadow-md">
-                <h1 className={`${mochiy.className} text-3xl`}>Playboard</h1>
+                <h1 className={`${mochiy.className} text-2xl`}>Playboard</h1>
             </div>
-            <div className="opacity-50">Made by Avi</div>
+            <div className="opacity-50 text-sm">Made by Avi</div>
             <div className="w-[160px] drop-shadow-md flex items-center justify-between">
-                            <SiInstagram size={32} className="text-white" />
-                            <SlSocialTwitter size={32} className="text-white"/>
-                            <TbBrandLinkedin size={32} className="text-white"/>
+                            <SiInstagram size={24} className="text-white" />
+                            <SlSocialTwitter size={24} className="text-white"/>
+                            <TbBrandLinkedin size={24} className="text-white"/>
             </div>
             </div>
         </div>
