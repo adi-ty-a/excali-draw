@@ -3,6 +3,9 @@ import Link from "next/link";
 import { Button } from "@/components/Button";
 import { Mochiy_Pop_One, Outfit } from "next/font/google";
 import {useForm ,SubmitHandler } from "react-hook-form"
+import axios from "axios";
+import { useRouter } from "next/navigation";
+
 
 const mochiy = Mochiy_Pop_One({
   weight: "400", // only one weight available
@@ -18,14 +21,28 @@ const outfit = Outfit({
 
 export default function Signup() {
 
+  const router =  useRouter()
+
   type form={
     email:string,
     password:string
   }
 
-  const {register,handleSubmit, formState: { errors,isSubmitting }} = useForm<form>();
-  const onsubmit: SubmitHandler<form> =(data)=>{
+  const {register,handleSubmit,setError, formState: { errors,isSubmitting }} = useForm<form>();
+  const onsubmit: SubmitHandler<form> = async(data)=>{
+try{
+      const response = await axios.post("http://localhost:3001/signIn",{
+        password:data.password,
+        email:data.email
+      })
+      if(response.data.msg ="logged in"){
+        localStorage.setItem('jwtToken', response.data.token);
+        router.push('/Dashboard')
+      }
 
+    }catch(e){
+      console.log(e);
+    }
   }
 
   return <div className="w-full h-screen bg-gradient-to-b from-[#120066] from-[-54.58%] to-black">

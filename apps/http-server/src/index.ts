@@ -32,11 +32,18 @@ app.post("/signUp",async(req,res)=>{
             }
         })
         res.json({
-            msg:response.id
+            msg:"signedup"
         })
-    }catch(e ){
-        if(e)
-        console.log(e)
+    }catch(e : any ){
+        if(e.code == "P2002"){
+            res.status(409).json({
+                error:'user already exist',
+                feild:e.meta?.target
+            })
+        }
+         return res.status(500).json({
+        error: "Something went wrong, please try again later"
+  });
     return
     }
     }
@@ -52,11 +59,10 @@ app.post("/signIn",async (req,res)=>{
         })
         return
     }else{
-
-    const {username,password}  =req.body;
+    const {email,password}  =req.body;
     const response = await prismaClient.users.findFirst({
         where:{
-            name:username,
+            email:email,
         },
         select:{
             password:true,
@@ -82,7 +88,10 @@ app.post("/signIn",async (req,res)=>{
     const secert = process.env.JWT_SECRET as string;
     console.log(secert);
     const token = jwt.sign({id},secert);
-    res.json(token)
+    res.json({
+        msg:"logged in",
+        token
+    })
 }
 })
 
@@ -146,6 +155,28 @@ app.get("/chats/:slug",async (req,res)=>{
         roomid
     })
     return 
+})
+
+app.get("/room/:slug",async(req,res)=>{
+    const slug = req.params.slug;
+    const response = await prismaClient.rooms.findFirst({
+        where:{
+            slug:slug
+        },
+        select:{
+            id:true
+        }
+    })
+    if(!response){
+        res.status(404).json({
+            msg:"no room of this name"
+        })
+    }
+    res.json({
+        msg:"room found",
+        id:response?.id
+    })
+
 })
 
 app.listen(3001);

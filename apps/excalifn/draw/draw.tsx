@@ -17,9 +17,7 @@ type shapes ={
 } 
 
 export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,WebSocket:WebSocket,tool:RefObject<string>){
-    console.log(tool.current);
     const existing: shapes[] =  await getExistingshapes(roomId); 
-    console.log(existing);
 
     if(canvas){
         const ctx = canvas.getContext("2d");
@@ -33,7 +31,6 @@ export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,
             if(message.type == "chat"){
                 const parsedmsg = JSON.parse(message.message)
                 existing.push(parsedmsg.shape);
-                console.log(parsedmsg.shape)
                 clearcanvas(existing,canvas,ctx)
 
             }
@@ -50,7 +47,6 @@ export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,
                 clicked = true
                 startx = e.clientX;
                 starty= e.clientY;
-                console.log(existing);
         })
         canvas.addEventListener("mouseup",(e)=>{
              clicked = false
@@ -130,6 +126,7 @@ function clearcanvas(exisitingshapes:shapes[], canvas:HTMLCanvasElement ,ctx:Can
 
 async function  getExistingshapes(roomId : string){
     const res = await axios.get(`http://localhost:3001/chats/${roomId}`);
+    
     if(!res.data){
         return []
     }

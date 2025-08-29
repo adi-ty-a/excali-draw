@@ -9,12 +9,11 @@ export function Canvaspage({roomid,WebSocket}:{
 }){
     const usecanvas = useRef<HTMLCanvasElement>(null);
     const tool = useRef<string>("rec")
+    const roomId= roomid
     useEffect(()=>{
         if(usecanvas.current){
-            intindraw(usecanvas.current,roomid,WebSocket,tool);
+            intindraw(usecanvas.current,roomId,WebSocket,tool);
                 }
-
-               
             },[usecanvas,roomid,WebSocket])
 
     return <div>

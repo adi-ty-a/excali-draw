@@ -13,11 +13,10 @@ interface user{
 const users:user[]=[];
 
 
-const wss = new WebSocketServer({ port: 8080 });
+const wss = new WebSocketServer({ port: 8090 });
 
 function checkuser(token : string) : number | null{
   const response = Jwt.verify(token,process.env.JWT_SECRET as string)
-  console.log(response);
   if(typeof response === "string"){
     return null
   }
@@ -35,6 +34,7 @@ wss.on('connection', function connection(ws,request) {
     
     const queryurl = new URLSearchParams(url.split("?")[1]);
     const token = queryurl.get("token") || "";
+  
     if(!token){
       ws.close()
       return 
@@ -53,13 +53,11 @@ wss.on('connection', function connection(ws,request) {
   
   ws.on('message', async function message(data) {
   const parsedData = JSON.parse(data as unknown as string);
-  console.log(parsedData);
-    console.log(users);
 
   if(parsedData.type == "join_room"){
     const user = users.find(x => x.ws == ws)
     if(user){
-    const room = Number(parsedData.room)
+    const room = Number(parsedData.roomId)
     user?.rooms.push(room);
     }
   }
@@ -74,10 +72,9 @@ wss.on('connection', function connection(ws,request) {
   }
 
   if(parsedData.type == "chat"){
-    const roomId = parsedData.room
+    const roomId = parsedData.roomId
     const message = parsedData.message
     const roomno = Number(roomId)
-    console.log(roomno);
     await prismaClient.chat.create({
       data:{
         roomid:roomno,
@@ -90,11 +87,12 @@ wss.on('connection', function connection(ws,request) {
       if(user.rooms.includes(roomno)){
         user.ws.send(JSON.stringify({
           type:"chat",
-          roomId:roomId,
+          roomId:roomno,
           message:message
         }))
       }
     })
+    console.log(users);
   }
   });
   

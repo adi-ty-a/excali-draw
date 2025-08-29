@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/Button";
 import { Mochiy_Pop_One, Outfit } from "next/font/google";
 import {useForm ,SubmitHandler } from "react-hook-form"
+import { useRouter } from "next/navigation";
 import axios from "axios";
 const mochiy = Mochiy_Pop_One({
   weight: "400", // only one weight available
@@ -17,7 +18,7 @@ const outfit = Outfit({
 });
 
 export default function Signup() {
-
+  const router =  useRouter()
   type form={
     email:string,
     password:string,
@@ -33,8 +34,9 @@ export default function Signup() {
         email:data.email
       })
 
-      if(response){
-        
+      if(response.data.msg == 'signedup'){
+        router.push('')
+        console.log("account created")
       }
     }catch(e){
       setError("email",{message:"Email already exist!"})
