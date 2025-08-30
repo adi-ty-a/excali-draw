@@ -36,7 +36,6 @@ export default function  Dashboard() {
     try{
       const response = await axios.get(`http://localhost:3001/room/${input}`)
       if(response.data){
-        console.log(response.id);
         setdisable(false);
         router.push(`/canvas/${response.data.id}`)
       }
