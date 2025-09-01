@@ -2,7 +2,6 @@ import { WebSocketServer } from 'ws';
 import Jwt, { JwtPayload }  from 'jsonwebtoken';
 import WebSocket from 'ws';
 import {prismaClient} from "@repo/db/clients"
-import { json } from 'express';
 require('dotenv').config();
 interface user{
   ws:WebSocket,

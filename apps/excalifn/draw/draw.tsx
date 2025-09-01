@@ -104,12 +104,16 @@ export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,
              }else if (tool.current == "select"){
                 const isshape = existing.find((e)=> e.id == selectedShapeId)
                     if(isshape){
-                        isshape.x =  e.clientX;
-                        isshape.y = e.clientY;
-                        shape = isshape;
+                        if(isshape.type == "rect"){
+                        isshape.x =  e.clientX - isshape.width/2 
+                        isshape.y = e.clientY - isshape.height/2 }
+                        else{
+                        isshape.x =  e.clientX  
+                        isshape.y = e.clientY 
                     }
+                    shape = isshape
+                }
              }
-             
             if(shape){
                 if(tool.current == "rec" || tool.current == "circle"){
                     existing.push(shape);
@@ -128,7 +132,6 @@ export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,
                     }));
                 }
             }
-             
 
         })
         canvas.addEventListener("mousemove",(e)=>{
@@ -141,8 +144,13 @@ export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,
                 if(tool.current == "select"){
                     const shape = existing.find((e)=> e.id == selectedShapeId)
                     if(shape){
-                        shape.x =  e.clientX;
-                        shape.y = e.clientY
+                        if(shape.type == "rect"){
+                        shape.x =  e.clientX - shape.width/2 
+                        shape.y = e.clientY - shape.height/2 }
+                        else{
+                        shape.x =  e.clientX  
+                        shape.y = e.clientY 
+                    }
                     }
                 }
                 if(tool.current == "rec"){
