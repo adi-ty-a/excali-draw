@@ -1,4 +1,5 @@
 import axios from "axios"
+import { object } from "motion/react-client";
 import { RefObject } from "react";
 
 type shapes ={
@@ -32,9 +33,23 @@ export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,
             const message = JSON.parse(event.data);
             if(message.type == "chat"){
                 const parsedmsg = JSON.parse(message.message)
-                existing.push(parsedmsg.shape);
+                const shape = existing.find(e => e.id == parsedmsg.tempid)
+                if(shape){
+                console.log(shape)
+                shape.id = message.id
+                }else{
+                    existing.push(parsedmsg.shape)
+                }
                 clearcanvas(existing,canvas,ctx)
 
+            }else if (message.type == "move_shape"){
+                const parsemsg = JSON.parse(message)
+                const shape = existing.find(e => e.id == parsemsg.id);
+                if(shape){
+                    Object.assign(shape,parsemsg.message);
+                }
+                clearcanvas(existing,canvas,ctx)  
+                
             }
         }
 
@@ -53,7 +68,6 @@ export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,
                 if(tool.current == "select"){
                     selectedShapeId = checkselection(existing,startx,starty,ctx)
                     clearcanvas(existing,canvas,ctx,selectedShapeId)
-                    console.log(selectedShapeId);
                 }
         })
         canvas.addEventListener("mouseup",(e)=>{
@@ -61,6 +75,9 @@ export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,
              const width = e.clientX-startx;
              const height = e.clientY-starty;
              let shape:shapes |null = null;
+
+              
+
               if(tool.current == "circle"){
                 const radius =  Math.abs(width / 2); 
                 const centerX = startx ;
@@ -75,8 +92,6 @@ export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,
                     endangle: 6.28
                 };
             }
-
-             
              else if(tool.current == "rec"){
                  shape = {
                     id:Date.now(),
@@ -86,14 +101,32 @@ export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,
                     height,
                     width
                  }
+             }else if (tool.current == "select"){
+                const isshape = existing.find((e)=> e.id == selectedShapeId)
+                    if(isshape){
+                        isshape.x =  e.clientX;
+                        isshape.y = e.clientY;
+                        shape = isshape;
+                    }
              }
+             
             if(shape){
-                existing.push(shape);
-                WebSocket.send(JSON.stringify({
-                   type:"chat",
-                   message:JSON.stringify({shape}),
-                   roomId
-                }));
+                if(tool.current == "rec" || tool.current == "circle"){
+                    existing.push(shape);
+                    WebSocket.send(JSON.stringify({
+                       type:"chat",
+                       message:JSON.stringify({shape}),
+                       roomId
+                    }));
+                }
+                else if(tool.current =="select"){
+                    console.log("selected shape moved ")
+                     WebSocket.send(JSON.stringify({
+                       type:"move_shape",
+                       message:JSON.stringify({shape}),
+                       roomId
+                    }));
+                }
             }
              
 
@@ -105,7 +138,13 @@ export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,
                 const raidus = width/2;
                 clearcanvas(existing,canvas,ctx)
                 ctx.strokeStyle = "rgb(255,255,255)";
-
+                if(tool.current == "select"){
+                    const shape = existing.find((e)=> e.id == selectedShapeId)
+                    if(shape){
+                        shape.x =  e.clientX;
+                        shape.y = e.clientY
+                    }
+                }
                 if(tool.current == "rec"){
                     ctx.strokeRect(startx,starty,width,height);
                 }
@@ -139,6 +178,7 @@ function clearcanvas(exisitingshapes:shapes[], canvas:HTMLCanvasElement ,ctx:Can
             ctx.stroke();
         }
     })
+
     const selectedshape :shapes | undefined = exisitingshapes.find((e)=> e.id == selectedShapeId)
     if(!selectedshape){
         return
@@ -167,8 +207,9 @@ async function  getExistingshapes(roomId : string){
         return []
     }
     const messages = res.data;
-    const shapes = messages.map((e : {message: string})=> {
+    const shapes = messages.map((e : {id:number,message: string})=> {
         const parsedData = JSON.parse(e.message);
+        parsedData.shape.id = e.id
         return parsedData.shape;
     })
     return shapes

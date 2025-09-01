@@ -27,6 +27,9 @@ export function Canvaspage({roomid,WebSocket}:{
         <button className="p-1 m-1 bg-blue-500 rounded-md text-white" onClick={()=> {
             console.log(tool.current)
             return tool.current="select"}}>Line</button>
+        <button className="p-1 m-1 bg-gray-500 rounded-md text-white" onClick={()=> {
+            console.log(tool.current)
+            return tool.current="Move"}}>Move</button>
         <canvas ref={usecanvas} width={1920} height={1080}></canvas>
     </div>
 }
