@@ -1,5 +1,4 @@
 import axios from "axios"
-import { object } from "motion/react-client";
 import { RefObject } from "react";
 
 type shapes ={
@@ -76,8 +75,6 @@ export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,
              const height = e.clientY-starty;
              let shape:shapes |null = null;
 
-              
-
               if(tool.current == "circle"){
                 const radius =  Math.abs(width / 2); 
                 const centerX = startx ;
@@ -139,7 +136,7 @@ export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,
                 const width = e.clientX-startx;
                 const height = e.clientY-starty;
                 const raidus = width/2;
-                clearcanvas(existing,canvas,ctx)
+                clearcanvas(existing,canvas,ctx,selectedShapeId)
                 ctx.strokeStyle = "rgb(255,255,255)";
                 if(tool.current == "select"){
                     const shape = existing.find((e)=> e.id == selectedShapeId)
@@ -163,7 +160,7 @@ export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,
                 }
             }
         }) 
-}
+    }
 }
 
 function clearcanvas(exisitingshapes:shapes[], canvas:HTMLCanvasElement ,ctx:CanvasRenderingContext2D,selectedShapeId?:number | null){
@@ -177,6 +174,7 @@ function clearcanvas(exisitingshapes:shapes[], canvas:HTMLCanvasElement ,ctx:Can
             ctx.strokeStyle = "rgb(255,255,255)";
             ctx.setLineDash([])
         ctx.strokeRect(shapes.x,shapes.y,shapes.width,shapes.height);
+
         }
         else if(shapes.type == "circle"){
             ctx.setLineDash([])
@@ -193,17 +191,26 @@ function clearcanvas(exisitingshapes:shapes[], canvas:HTMLCanvasElement ,ctx:Can
     }
     if(selectedshape.type == "rect" ){
     ctx.strokeStyle = "rgb(255,158,255)";
-    ctx.setLineDash([20,5]);
     ctx.strokeRect(
     selectedshape.x - 15 * Math.sign(selectedshape.width),
     selectedshape.y - 15 * Math.sign(selectedshape.height),
     selectedshape.width + 30 * Math.sign(selectedshape.width),
     selectedshape.height + 30 * Math.sign(selectedshape.height)
     );
+    
+    drawCircle(ctx,selectedshape.x - 15 * Math.sign(selectedshape.width),selectedshape.y - 15 * Math.sign(selectedshape.height),7);
+    drawCircle(ctx,selectedshape.x + 15 * Math.sign(selectedshape.width) + selectedshape.width,selectedshape.y - 15 * Math.sign(selectedshape.height),7);
+    drawCircle(ctx,selectedshape.x - 15 * Math.sign(selectedshape.width),selectedshape.y  + selectedshape.height + 15 * Math.sign(selectedshape.height) ,7);
+    drawCircle(ctx,selectedshape.x + 15 * Math.sign(selectedshape.width) + selectedshape.width,selectedshape.y + 15 * Math.sign(selectedshape.height) + selectedshape.height ,7);
     }else if(selectedshape.type == "circle" ){
     ctx.strokeStyle = "rgb(255,158,255)";
-    ctx.setLineDash([20,5]);
     ctx.strokeRect(selectedshape.x - selectedshape.raidus -15,selectedshape.y - selectedshape.raidus -15,selectedshape.raidus * 2 + 30 ,selectedshape.raidus *2 + 30);
+    
+    drawCircle(ctx,selectedshape.x - 15 - selectedshape.raidus,selectedshape.y - 15 - selectedshape.raidus,7);
+    drawCircle(ctx,selectedshape.x + 15 - selectedshape.raidus  + selectedshape.raidus *2,selectedshape.y - 15 - selectedshape.raidus,7);
+    drawCircle(ctx,selectedshape.x - 15 - selectedshape.raidus,selectedshape.y + 15 + selectedshape.raidus,7);
+    drawCircle(ctx,selectedshape.x + 15 - selectedshape.raidus  + selectedshape.raidus *2,selectedshape.y + 15 + selectedshape.raidus ,7);
+
     }
     
 }
@@ -261,4 +268,14 @@ function ispointinshape(shape:shapes,startx:number,starty:number,){
     return distance <= shape.raidus
     }
     return false;   
+}
+
+function drawCircle(ctx : CanvasRenderingContext2D,x:number, y:number, r:number) {
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0,6.28);
+  ctx.fillStyle = "#000000";
+  ctx.fill();
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = "rgb(255,158,255)";
+  ctx.stroke();
 }
