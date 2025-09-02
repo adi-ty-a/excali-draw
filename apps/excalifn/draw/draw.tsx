@@ -18,9 +18,18 @@ type shapes ={
     endangle:6.28
 } 
 
+type handles = {
+    x:number,
+    y:number,
+    r:number
+    id:number,
+    position:"topleft" | "topright" | "bottomleft" | "bottomright"
+}
+
 export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,WebSocket:WebSocket,tool:RefObject<string>){
     const existing: shapes[] =  await getExistingshapes(roomId); 
     let selectedShapeId: number | null = null
+    let circleshandles:handles[] = [] 
     if(canvas){
         const ctx = canvas.getContext("2d");
 
@@ -34,39 +43,54 @@ export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,
                 const parsedmsg = JSON.parse(message.message)
                 const shape = existing.find(e => e.id == parsedmsg.tempid)
                 if(shape){
-                console.log(shape)
                 shape.id = message.id
                 }else{
                     existing.push(parsedmsg.shape)
                 }
-                clearcanvas(existing,canvas,ctx)
+                clearcanvas(existing,canvas,ctx,circleshandles)
 
             }else if (message.type == "move_shape"){
-                const parsemsg = JSON.parse(message)
-                const shape = existing.find(e => e.id == parsemsg.id);
+                const parsemsg = JSON.parse(message.message)
+                const shape = existing.find(e => e.id == parsemsg.shape.id);
                 if(shape){
-                    Object.assign(shape,parsemsg.message);
+                    Object.assign(shape,parsemsg.shape);
                 }
-                clearcanvas(existing,canvas,ctx)  
+                clearcanvas(existing,canvas,ctx,circleshandles)  
                 
             }
         }
 
         let clicked = false;
+        let sizing = false;
+        let moving = false;
         let startx = 0;
         let starty = 0;
         ctx.fillStyle ="rgb(0,0,0)";
         ctx.fillRect(0,0,canvas.width,canvas.height);
-        clearcanvas(existing,canvas,ctx)
+        clearcanvas(existing,canvas,ctx,circleshandles)
 
         canvas.addEventListener("mousedown",(e)=>{
                 clicked = true
-                startx = e.clientX;
-                starty= e.clientY;
+                 const { x, y } = getCanvasCoords(canvas, e);
+                startx = x;
+                starty = y;
 
                 if(tool.current == "select"){
-                    selectedShapeId = checkselection(existing,startx,starty,ctx)
-                    clearcanvas(existing,canvas,ctx,selectedShapeId)
+                    const hanlde = ishandleclicked(circleshandles,startx,starty)
+                                            console.log(hanlde)
+                    if(hanlde){
+                        console.log("handle clicked")
+                        sizing = true;
+                    }
+                    const newselection = checkselection(existing,startx,starty,ctx)
+
+                    if(newselection){
+                    if(newselection !== selectedShapeId){
+                    selectedShapeId = newselection;
+                    circleshandles.length = 0;
+                    clearcanvas(existing,canvas,ctx,circleshandles,selectedShapeId)
+                    }
+                    }
                 }
         })
         canvas.addEventListener("mouseup",(e)=>{
@@ -99,20 +123,25 @@ export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,
                     width
                  }
              }else if (tool.current == "select"){
-                const isshape = existing.find((e)=> e.id == selectedShapeId)
+                if(!sizing && moving){
+                    const isshape = existing.find((e)=> e.id == selectedShapeId)
                     if(isshape){
                         if(isshape.type == "rect"){
-                        isshape.x =  e.clientX - isshape.width/2 
-                        isshape.y = e.clientY - isshape.height/2 }
-                        else{
-                        isshape.x =  e.clientX  
-                        isshape.y = e.clientY 
+                            isshape.x =  e.clientX - isshape.width/2 
+                            isshape.y = e.clientY - isshape.height/2 }
+                            else{
+                                isshape.x =  e.clientX  
+                                isshape.y = e.clientY 
+                            }
+                            shape = isshape
+                        }
                     }
-                    shape = isshape
-                }
+             }
+             if(sizing){
+                sizing = false
              }
             if(shape){
-                if(tool.current == "rec" || tool.current == "circle"){
+                if(tool.current == "rec" || tool.current == "circle" ){
                     existing.push(shape);
                     WebSocket.send(JSON.stringify({
                        type:"chat",
@@ -121,22 +150,23 @@ export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,
                     }));
                 }
                 else if(tool.current =="select"){
-                    console.log("selected shape moved ")
                      WebSocket.send(JSON.stringify({
                        type:"move_shape",
                        message:JSON.stringify({shape}),
                        roomId
                     }));
+                    moving = false; 
                 }
             }
 
         })
         canvas.addEventListener("mousemove",(e)=>{
             if(clicked){
+                moving = true
                 const width = e.clientX-startx;
                 const height = e.clientY-starty;
                 const raidus = width/2;
-                clearcanvas(existing,canvas,ctx,selectedShapeId)
+                clearcanvas(existing,canvas,ctx,circleshandles,selectedShapeId)
                 ctx.strokeStyle = "rgb(255,255,255)";
                 if(tool.current == "select"){
                     const shape = existing.find((e)=> e.id == selectedShapeId)
@@ -163,11 +193,10 @@ export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,
     }
 }
 
-function clearcanvas(exisitingshapes:shapes[], canvas:HTMLCanvasElement ,ctx:CanvasRenderingContext2D,selectedShapeId?:number | null){
+function clearcanvas(exisitingshapes:shapes[], canvas:HTMLCanvasElement ,ctx:CanvasRenderingContext2D,circleshandles :handles[],selectedShapeId?:number | null){
     ctx.clearRect(0,0,canvas.width,canvas.height);
     ctx.fillStyle ="rgb(0,0,0)";
     ctx.fillRect(0,0,canvas.width,canvas.height);
-
     exisitingshapes.map((shapes)=>{
     
         if(shapes.type == "rect"){
@@ -186,32 +215,33 @@ function clearcanvas(exisitingshapes:shapes[], canvas:HTMLCanvasElement ,ctx:Can
     })
 
     const selectedshape :shapes | undefined = exisitingshapes.find((e)=> e.id == selectedShapeId)
-    if(!selectedshape){
+    if(!selectedshape || !selectedShapeId ){
         return
     }
-    if(selectedshape.type == "rect" ){
-    ctx.strokeStyle = "rgb(255,158,255)";
-    ctx.strokeRect(
+    if(selectedshape){
+        if(selectedshape.type == "rect" ){
+            ctx.strokeStyle = "rgb(255,158,255)";
+            ctx.strokeRect(
     selectedshape.x - 15 * Math.sign(selectedshape.width),
     selectedshape.y - 15 * Math.sign(selectedshape.height),
     selectedshape.width + 30 * Math.sign(selectedshape.width),
     selectedshape.height + 30 * Math.sign(selectedshape.height)
     );
-    
-    drawCircle(ctx,selectedshape.x - 15 * Math.sign(selectedshape.width),selectedshape.y - 15 * Math.sign(selectedshape.height),7);
-    drawCircle(ctx,selectedshape.x + 15 * Math.sign(selectedshape.width) + selectedshape.width,selectedshape.y - 15 * Math.sign(selectedshape.height),7);
-    drawCircle(ctx,selectedshape.x - 15 * Math.sign(selectedshape.width),selectedshape.y  + selectedshape.height + 15 * Math.sign(selectedshape.height) ,7);
-    drawCircle(ctx,selectedshape.x + 15 * Math.sign(selectedshape.width) + selectedshape.width,selectedshape.y + 15 * Math.sign(selectedshape.height) + selectedshape.height ,7);
+    drawCircle(ctx,selectedshape.x - 15 * Math.sign(selectedshape.width),selectedshape.y - 15 * Math.sign(selectedshape.height),7,circleshandles,selectedShapeId,"topleft");
+    drawCircle(ctx,selectedshape.x + 15 * Math.sign(selectedshape.width) + selectedshape.width,selectedshape.y - 15 * Math.sign(selectedshape.height),7,circleshandles,selectedShapeId,"topright");
+    drawCircle(ctx,selectedshape.x - 15 * Math.sign(selectedshape.width),selectedshape.y  + selectedshape.height + 15 * Math.sign(selectedshape.height) ,7,circleshandles,selectedShapeId,"bottomleft");
+    drawCircle(ctx,selectedshape.x + 15 * Math.sign(selectedshape.width) + selectedshape.width,selectedshape.y + 15 * Math.sign(selectedshape.height) + selectedshape.height ,7,circleshandles,selectedShapeId,"bottomright");
     }else if(selectedshape.type == "circle" ){
     ctx.strokeStyle = "rgb(255,158,255)";
     ctx.strokeRect(selectedshape.x - selectedshape.raidus -15,selectedshape.y - selectedshape.raidus -15,selectedshape.raidus * 2 + 30 ,selectedshape.raidus *2 + 30);
     
-    drawCircle(ctx,selectedshape.x - 15 - selectedshape.raidus,selectedshape.y - 15 - selectedshape.raidus,7);
-    drawCircle(ctx,selectedshape.x + 15 - selectedshape.raidus  + selectedshape.raidus *2,selectedshape.y - 15 - selectedshape.raidus,7);
-    drawCircle(ctx,selectedshape.x - 15 - selectedshape.raidus,selectedshape.y + 15 + selectedshape.raidus,7);
-    drawCircle(ctx,selectedshape.x + 15 - selectedshape.raidus  + selectedshape.raidus *2,selectedshape.y + 15 + selectedshape.raidus ,7);
-
-    }
+    drawCircle(ctx,selectedshape.x - 15 - selectedshape.raidus,selectedshape.y - 15 - selectedshape.raidus,7,circleshandles,selectedShapeId,"topleft");
+    drawCircle(ctx,selectedshape.x + 15 - selectedshape.raidus  + selectedshape.raidus *2,selectedshape.y - 15 - selectedshape.raidus,7,circleshandles,selectedShapeId,"topright");
+    drawCircle(ctx,selectedshape.x - 15 - selectedshape.raidus,selectedshape.y + 15 + selectedshape.raidus,7,circleshandles,selectedShapeId,"bottomleft");
+    drawCircle(ctx,selectedshape.x + 15 - selectedshape.raidus  + selectedshape.raidus *2,selectedshape.y + 15 + selectedshape.raidus ,7,circleshandles,selectedShapeId,"bottomright");  
+}
+    
+}
     
 }
 
@@ -240,16 +270,14 @@ function checkselection(existing:shapes[],startx:number,starty:number,ctx:Canvas
         }
     }
     if(selectedshape){
-                console.log(selectedshape.type)
                 return selectedshape.id
     }else{
-        console.log("no shape selected ")
         return null
     }
     return null
 }
 
-function ispointinshape(shape:shapes,startx:number,starty:number,){
+function ispointinshape(shape:shapes ,startx:number,starty:number,){
     if(shape.type == 'rect'){
     const left   = Math.min(shape.x, shape.x + shape.width);
     const right  = Math.max(shape.x, shape.x + shape.width);
@@ -270,7 +298,7 @@ function ispointinshape(shape:shapes,startx:number,starty:number,){
     return false;   
 }
 
-function drawCircle(ctx : CanvasRenderingContext2D,x:number, y:number, r:number) {
+function drawCircle(ctx : CanvasRenderingContext2D,x:number, y:number, r:number,circleshandles:handles[],selectedShapeId:number,position:handles["position"]){
   ctx.beginPath();
   ctx.arc(x, y, r, 0,6.28);
   ctx.fillStyle = "#000000";
@@ -278,4 +306,33 @@ function drawCircle(ctx : CanvasRenderingContext2D,x:number, y:number, r:number)
   ctx.lineWidth = 1;
   ctx.strokeStyle = "rgb(255,158,255)";
   ctx.stroke();
+  circleshandles.push({x, y, r,id:selectedShapeId,position})
+  
+}
+
+function ishandleclicked(circleshandles:handles[],startx:number,starty:number){
+    for(const h of circleshandles){
+        if (insidehandle(h, startx, starty)) {
+
+            return true; 
+        }
+    }
+    return null
+}
+function insidehandle(shape:handles ,startx:number,starty:number,){
+    if(shape){
+        const dx = startx - shape.x;
+        const dy = starty - shape.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        return distance <= shape.r
+    }
+    return false;   
+}
+
+function getCanvasCoords(canvas: HTMLCanvasElement, e: MouseEvent) {
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: e.clientX - rect.left,
+    y: e.clientY - rect.top
+  };
 }
