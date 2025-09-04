@@ -80,7 +80,7 @@ wss.on('connection', function connection(ws,request) {
       data:{
         roomid:roomno,
         message:message,
-        userId
+        userId,
       }
     })
     console.log(shape.id);

@@ -30,6 +30,7 @@ export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,
     const existing: shapes[] =  await getExistingshapes(roomId); 
     let selectedShapeId: number | null = null
     let circleshandles:handles[] = [] 
+    let handleposition :string | null = null
     if(canvas){
         const ctx = canvas.getContext("2d");
 
@@ -41,30 +42,43 @@ export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,
             const message = JSON.parse(event.data);
             if(message.type == "chat"){
                 const parsedmsg = JSON.parse(message.message)
-                const shape = existing.find(e => e.id == parsedmsg.tempid)
-                if(shape){
-                shape.id = message.id
-                }else{
-                    existing.push(parsedmsg.shape)
+                const last = existing.find(e => e.id == parsedmsg.shape.id )
+                if(last){
+                    if (selectedShapeId === last.id) {
+                    selectedShapeId = message.id;
+                    console.log(existing)
                 }
+                last.id = message.id;
+                }else if (!last) {
+                existing.push(parsedmsg.shape);
+        }
                 clearcanvas(existing,canvas,ctx,circleshandles)
 
             }else if (message.type == "move_shape"){
                 const parsemsg = JSON.parse(message.message)
                 const shape = existing.find(e => e.id == parsemsg.shape.id);
                 if(shape){
+                    if (selectedShapeId === parsemsg.shape.id) {
+                        selectedShapeId = parsemsg.shape.id;
+                    }
                     Object.assign(shape,parsemsg.shape);
                 }
-                clearcanvas(existing,canvas,ctx,circleshandles)  
-                
+                clearcanvas(existing,canvas,ctx,circleshandles,selectedShapeId)  
             }
         }
 
         let clicked = false;
         let sizing = false;
         let moving = false;
+        let initialwidth = 0;
+        let initialheight = 0 
         let startx = 0;
         let starty = 0;
+        let shapestartx = 0;
+        let shapestarty = 0;
+        let sizestartx = 0;
+        let sizestarty = 0;
+        let initialradius = 0;
         ctx.fillStyle ="rgb(0,0,0)";
         ctx.fillRect(0,0,canvas.width,canvas.height);
         clearcanvas(existing,canvas,ctx,circleshandles)
@@ -77,24 +91,44 @@ export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,
 
                 if(tool.current == "select"){
                     const hanlde = ishandleclicked(circleshandles,startx,starty)
-                                            console.log(hanlde)
                     if(hanlde){
-                        console.log("handle clicked")
+                        handleposition =hanlde
                         sizing = true;
                     }
                     const newselection = checkselection(existing,startx,starty,ctx)
-
                     if(newselection){
-                    if(newselection !== selectedShapeId){
-                    selectedShapeId = newselection;
-                    circleshandles.length = 0;
-                    clearcanvas(existing,canvas,ctx,circleshandles,selectedShapeId)
-                    }
+                        if(newselection !== selectedShapeId){
+                            selectedShapeId = newselection;
+                            circleshandles.length = 0;
+                            clearcanvas(existing,canvas,ctx,circleshandles,selectedShapeId)
+                        }
+                        const selectedshape = existing.find((e)=> e.id == selectedShapeId)
+                        if(selectedshape){
+                            if(selectedshape.type == "rect" ){
+                                initialwidth = selectedshape.width;
+                                initialheight = selectedshape.height;
+                                shapestartx = selectedshape.x;
+                                shapestarty = selectedshape.y;
+                                sizestartx =selectedshape.x;
+                                sizestarty =selectedshape.y;
+                            }
+                            if(selectedshape.type == "circle" ){
+                                initialradius = selectedshape.raidus;
+                                shapestartx = selectedshape.x;
+                                shapestarty = selectedshape.y;
+                                sizestartx =selectedshape.x;
+                                sizestarty =selectedshape.y;
+                            }
+                        }
+                        clearcanvas(existing,canvas,ctx,circleshandles,selectedShapeId)
+                    }else{
+                        moving = false
                     }
                 }
         })
         canvas.addEventListener("mouseup",(e)=>{
              clicked = false
+             
              const width = e.clientX-startx;
              const height = e.clientY-starty;
              let shape:shapes |null = null;
@@ -104,7 +138,7 @@ export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,
                 const centerX = startx ;
                 const centerY = starty ;
                 shape = {
-                    id: Date.now(),
+                    id:   (Date.now() + Math.floor(Math.random() * 1000)) % 2147483647,
                     type: "circle",
                     x: centerX,
                     y: centerY,
@@ -115,38 +149,68 @@ export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,
             }
              else if(tool.current == "rec"){
                  shape = {
-                    id:Date.now(),
+                    id: (Date.now() + Math.floor(Math.random() * 1000)) % 2147483647,
                     type:"rect",
                     x:startx,
                     y:starty,
                     height,
                     width
                  }
+
              }else if (tool.current == "select"){
-                if(!sizing && moving){
-                    const isshape = existing.find((e)=> e.id == selectedShapeId)
-                    if(isshape){
-                        if(isshape.type == "rect"){
-                            isshape.x =  e.clientX - isshape.width/2 
-                            isshape.y = e.clientY - isshape.height/2 }
-                            else{
-                                isshape.x =  e.clientX  
-                                isshape.y = e.clientY 
-                            }
-                            shape = isshape
-                        }
+                 if(sizing){
+                     const isshape = existing.find((e)=> e.id == selectedShapeId)
+                       if(isshape){
+                            if (isshape && isshape.type == "rect" && (sizestartx !== 0 || sizestarty !== 0)) {
+                        const { x: mouseX, y: mouseY } = getCanvasCoords(canvas, e);
+                        const cx = sizestartx + initialwidth / 2;
+                        const cy = sizestarty + initialheight / 2;
+                        const scaleX = (mouseX - cx) / (startx - cx);
+                        const scaleY = (mouseY - cy) / (starty - cy);
+                        isshape.width = initialwidth * scaleX;
+                        isshape.height = initialheight * scaleY;
+                        isshape.x = cx - isshape.width / 2;
+                        isshape.y = cy - isshape.height / 2;
                     }
-             }
-             if(sizing){
-                sizing = false
-             }
+                    else if(isshape && isshape.type == "circle" && (sizestartx !== 0 || sizestarty !== 0)){
+                            const { x: mouseX, y: mouseY } = getCanvasCoords(canvas, e);
+                            const dx = mouseX - isshape.x;
+                            const dy = mouseY - isshape.y;
+                            const newRadius = Math.sqrt(dx * dx + dy * dy);
+                            isshape.raidus = newRadius;
+                        }
+                    shape = isshape
+                    
+                    }
+                    
+                    sizing = false
+                 }  
+                if(!sizing ){
+                    const isshape = existing.find((e)=> e.id == selectedShapeId)
+
+                    if(isshape && (shapestartx !== 0 || shapestarty !== 0) ){
+                        if(isshape.type == "rect" || isshape.type == "circle"){
+                            const { x: mouseX, y: mouseY } = getCanvasCoords(canvas, e)
+                            const x = mouseX- startx 
+                            const y = mouseY - starty 
+                            isshape.x =  shapestartx + x
+                            isshape.y =  shapestarty + y
+                        }
+                        shapestartx=0
+                        shapestarty=0
+                        sizestartx=isshape.x
+                        sizestarty=isshape.y
+                        shape = isshape
+                    }
+                }
+            }
             if(shape){
                 if(tool.current == "rec" || tool.current == "circle" ){
                     existing.push(shape);
                     WebSocket.send(JSON.stringify({
                        type:"chat",
                        message:JSON.stringify({shape}),
-                       roomId
+                       roomId,
                     }));
                 }
                 else if(tool.current =="select"){
@@ -162,24 +226,45 @@ export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,
         })
         canvas.addEventListener("mousemove",(e)=>{
             if(clicked){
-                moving = true
                 const width = e.clientX-startx;
                 const height = e.clientY-starty;
                 const raidus = width/2;
                 clearcanvas(existing,canvas,ctx,circleshandles,selectedShapeId)
                 ctx.strokeStyle = "rgb(255,255,255)";
-                if(tool.current == "select"){
+                if(tool.current == "select" ){
                     const shape = existing.find((e)=> e.id == selectedShapeId)
-                    if(shape){
-                        if(shape.type == "rect"){
-                        shape.x =  e.clientX - shape.width/2 
-                        shape.y = e.clientY - shape.height/2 }
-                        else{
-                        shape.x =  e.clientX  
-                        shape.y = e.clientY 
+                    if((shapestartx !== 0 || shapestarty !== 0) && shape){
+                        if(shape.type == "rect" || shape.type == "circle"){
+                        const { x: mouseX, y: mouseY } = getCanvasCoords(canvas, e)
+                        const x = mouseX- startx 
+                        const y = mouseY - starty 
+                        shape.x =  shapestartx + x
+                        shape.y =  shapestarty + y
                     }
                     }
                 }
+                if(sizing){
+                 const isshape = existing.find((e)=> e.id == selectedShapeId)
+                    if(isshape){
+                        if (isshape && isshape.type == "rect" && (sizestartx !== 0 || sizestarty !== 0)) {
+                            const { x: mouseX, y: mouseY } = getCanvasCoords(canvas, e);
+                            const cx = sizestartx + initialwidth / 2;
+                            const cy = sizestarty + initialheight / 2;
+                            const scaleX = (mouseX - cx) / (startx - cx);
+                            const scaleY = (mouseY - cy) / (starty - cy);
+                            isshape.width = initialwidth * scaleX;
+                            isshape.height = initialheight * scaleY;
+                            isshape.x = cx - isshape.width / 2;
+                            isshape.y = cy - isshape.height / 2;
+                        }else if(isshape && isshape.type == "circle" && (sizestartx !== 0 || sizestarty !== 0)){
+                            const { x: mouseX, y: mouseY } = getCanvasCoords(canvas, e);
+                            const dx = mouseX - isshape.x;
+                            const dy = mouseY - isshape.y;
+                            const newRadius = Math.sqrt(dx * dx + dy * dy);
+                            isshape.raidus = newRadius;
+                        }
+                }
+             }
                 if(tool.current == "rec"){
                     ctx.strokeRect(startx,starty,width,height);
                 }
@@ -196,6 +281,7 @@ export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,
 function clearcanvas(exisitingshapes:shapes[], canvas:HTMLCanvasElement ,ctx:CanvasRenderingContext2D,circleshandles :handles[],selectedShapeId?:number | null){
     ctx.clearRect(0,0,canvas.width,canvas.height);
     ctx.fillStyle ="rgb(0,0,0)";
+    circleshandles.length = 0;
     ctx.fillRect(0,0,canvas.width,canvas.height);
     exisitingshapes.map((shapes)=>{
     
@@ -313,8 +399,7 @@ function drawCircle(ctx : CanvasRenderingContext2D,x:number, y:number, r:number,
 function ishandleclicked(circleshandles:handles[],startx:number,starty:number){
     for(const h of circleshandles){
         if (insidehandle(h, startx, starty)) {
-
-            return true; 
+            return h.position; 
         }
     }
     return null
@@ -335,4 +420,10 @@ function getCanvasCoords(canvas: HTMLCanvasElement, e: MouseEvent) {
     x: e.clientX - rect.left,
     y: e.clientY - rect.top
   };
+}
+
+function sizingcal(startx:number,starty:number,endx:number,endy:number){
+    const width = endx - startx;
+    const height = endy - starty
+    return {height,width}
 }

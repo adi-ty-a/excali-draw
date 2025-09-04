@@ -19,7 +19,7 @@ export function Canvaspage({roomid,WebSocket}:{
     return <div>
         <button className="p-1 m-1 bg-green-500 rounded-md text-white" onClick={()=> {
             console.log(tool.current)
-            return tool.current="circle"} 
+            return tool.current="circle"}  
         }>Circle</button>
         <button className="p-1 m-1 bg-purple-500 rounded-md text-white"onClick={()=> {
             console.log(tool.current)
