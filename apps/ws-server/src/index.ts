@@ -125,6 +125,28 @@ wss.on('connection', function connection(ws,request) {
       }
     })
   }
+   if(parsedData.type == "delete_shape"){
+    const roomId = parsedData.roomId
+    const shapid = parsedData.shapetoease
+    const roomno = Number(roomId)
+    console.log(parsedData)
+    await prismaClient.chat.delete({
+      where:{
+        id:shapid
+      }
+    })
+    console.log("removed")
+
+    users.forEach(user =>{
+      if(user.rooms.includes(roomno)){
+        user.ws.send(JSON.stringify({
+          type:"delete_shape",
+          roomId:roomno,
+          id:shapid,
+        }))
+      }
+    })
+  }
 
   });
   

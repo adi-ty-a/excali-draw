@@ -85,7 +85,7 @@ export default function Home(){
         <motion.div 
         variants={child}
         className='relative -z-10'>
-            <Image  className="relative z-10 mask-b-from-20% mask-b-to-80%" alt="online sketchboard image" src={picture} priority  /> 
+            <Image  className="relative  z-10 mask-b-from-20% mask-b-to-80%" alt="online sketchboard image " src={picture} priority  /> 
             <div className=" absolute left-[425px] inset-0 w-[500px] h-[500px] bg-blue-700 blur-[200px] z-0"></div>
         </motion.div>
             </motion.div>

@@ -65,6 +65,19 @@ export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,
                 }
                 clearcanvas(existing,canvas,ctx,circleshandles,selectedShapeId)  
             }
+            else if (message.type == "delete_shape"){
+                const easeshapeid = JSON.parse(message.id)
+                const index = existing.findIndex(e => e.id == easeshapeid);
+                if(index !== -1){
+                    console.log(existing)
+                    existing.splice(index,1)
+                    console.log(existing)
+                }
+                if (selectedShapeId === easeshapeid) {
+                    selectedShapeId = null;
+                }
+                clearcanvas(existing,canvas,ctx,circleshandles,selectedShapeId)  
+            }
         }
 
         let clicked = false;
@@ -78,6 +91,7 @@ export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,
         let shapestarty = 0;
         let sizestartx = 0;
         let sizestarty = 0;
+        let shapetoease = 0;
         let initialradius = 0;
         ctx.fillStyle ="rgb(0,0,0)";
         ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -222,6 +236,14 @@ export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,
                     moving = false; 
                 }
             }
+            else if(tool.current =="erase" && shapetoease !==0 ){
+                     WebSocket.send(JSON.stringify({
+                       type:"delete_shape",
+                       shapetoease,
+                       roomId
+                    }));
+                    shapetoease=0
+                }
 
         })
         canvas.addEventListener("mousemove",(e)=>{
@@ -243,6 +265,7 @@ export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,
                     }
                     }
                 }
+
                 if(sizing){
                  const isshape = existing.find((e)=> e.id == selectedShapeId)
                     if(isshape){
@@ -265,6 +288,16 @@ export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,
                         }
                 }
              }
+                if(tool.current == "erase"){
+                    const { x: mouseX, y: mouseY } = getCanvasCoords(canvas, e);
+                    const eraseshape = checkselection(existing,mouseX,mouseY,ctx);
+                    if(eraseshape){
+                        shapetoease =eraseshape
+                        console.log(shapetoease);
+                    }
+
+                }
+
                 if(tool.current == "rec"){
                     ctx.strokeRect(startx,starty,width,height);
                 }

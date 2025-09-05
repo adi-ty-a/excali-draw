@@ -16,7 +16,7 @@ export const Button=({prop,content,btnsize,btnscale,btndisable,btnfunction}:btnt
         "pink":"flex flex-row justify-center items-center relative bg-gradient-to-b from-[#D800FF] to-[#8E009B] drop-shadow-md  z-10 shadow-[0_0_20px_rgba(216,0,255,0.7)] flex-none order-2 grow-0 text-xl font-medium text-shadow-white border-b-[1px] border-r border-l border-white hover:from-[#d94fff] hover:to-[#ff4ffc] transition duration-300"
     }
     const size ={
-        "small":"w-[80px] h-[30px] p-[18px] rounded-[15px] w-full",
+        "small":"w-[100px] h-[30px] p-[18px] rounded-[15px] ",
         "medium":" p-[10px] w-[245px] h-[42px] rounded-[4px]",
         "larger":"w-[300px] h-[42px] rounded-[4px] "
     }
