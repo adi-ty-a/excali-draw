@@ -5,7 +5,7 @@ import {prismaClient} from "@repo/db/clients"
 require('dotenv').config();
 interface user{
   ws:WebSocket,
-  rooms:number[],
+  rooms:number | null,
   userId:number
 }
 
@@ -47,7 +47,7 @@ wss.on('connection', function connection(ws,request) {
   users.push({
     userId:userId,
     ws,
-    rooms:[]
+    rooms:null
   })
   
   ws.on('message', async function message(data) {
@@ -57,7 +57,7 @@ wss.on('connection', function connection(ws,request) {
     const user = users.find(x => x.ws == ws)
     if(user){
     const room = Number(parsedData.roomId)
-    user?.rooms.push(room);
+    user.rooms = room;
     }
   }
 
@@ -66,8 +66,10 @@ wss.on('connection', function connection(ws,request) {
     if(!user){
       return
     }
-      const room = Number(parsedData.room)
-    user.rooms = user?.rooms.filter(x => x !== room);
+    const roomId = Number(parsedData.roomId)
+    if(user.rooms === roomId){
+      user.rooms = null
+    };
   }
 
   if(parsedData.type == "chat"){
@@ -86,7 +88,7 @@ wss.on('connection', function connection(ws,request) {
     console.log(shape.id);
 
     users.forEach(user =>{
-      if(user.rooms.includes(roomno)){
+      if(user.rooms === roomno){
         user.ws.send(JSON.stringify({
           type:"chat",
           roomId:roomno,
@@ -115,7 +117,7 @@ wss.on('connection', function connection(ws,request) {
     })
 
     users.forEach(user =>{
-      if(user.rooms.includes(roomno)){
+      if(user.rooms === roomno){
         user.ws.send(JSON.stringify({
           type:"move_shape",
           roomId:roomno,
@@ -138,7 +140,7 @@ wss.on('connection', function connection(ws,request) {
     console.log("removed")
 
     users.forEach(user =>{
-      if(user.rooms.includes(roomno)){
+      if(user.rooms === roomno){
         user.ws.send(JSON.stringify({
           type:"delete_shape",
           roomId:roomno,

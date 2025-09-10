@@ -1,12 +1,19 @@
 "use client"
 import { useEffect, useState } from "react";
 import { Canvaspage } from "./Canvas";
+import axios from "axios";
 export function Roomcanvas({roomid}:{
     roomid:string
 }){
 
     const [socket,setsocket] = useState<WebSocket>()
+    const [slug,setslug] =  useState("");
     useEffect(()=>{
+        axios.get(`http://localhost:3001/slug/${roomid}`).then((e)=>{
+            setslug(e.data.slug)
+             
+        })
+       
         const ws = new WebSocket(`ws://localhost:8090?token=${localStorage.getItem("jwtToken")}`);
         ws.onopen =()=>{
             setsocket(ws);
@@ -23,5 +30,5 @@ export function Roomcanvas({roomid}:{
     if(!socket){
         return <div>loading</div>
     }
- return <Canvaspage roomid={roomid} WebSocket={socket}/>
+ return <Canvaspage roomid={roomid} WebSocket={socket} slug={slug}/>
 }

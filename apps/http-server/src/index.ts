@@ -159,6 +159,7 @@ app.get("/chats/:slug",async (req,res)=>{
 
 app.get("/room/:slug",async(req,res)=>{
     const slug = req.params.slug;
+    console.log(slug)
     const response = await prismaClient.rooms.findFirst({
         where:{
             slug:slug
@@ -178,5 +179,54 @@ app.get("/room/:slug",async(req,res)=>{
     })
 
 })
+
+app.get("/slug/:id",async(req,res)=>{
+    const id = req.params.id;
+    try{
+    const response = await prismaClient.rooms.findFirst({
+        where:{
+            id:Number(id)
+        },
+        select:{
+            slug:true
+        }
+    })
+    if(!response){
+        return res.status(404).json({
+            msg:"no slug of this id"
+        })
+    }
+    res.json({
+        msg:"slug found",
+        slug:response?.slug
+    })
+    }catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "server error" });
+  }
+
+})
+
+app.get("/verify-token", Middleware, (req, res) => {
+  res.json({ valid: true, userId: req.userid });
+});
+// show rooms created by user in frontend
+app.get("/userRooms/:id",async (req, res) => {
+    const id = req.params.id
+    const rooms = await prismaClient.rooms.findMany({
+    where:{
+        adminId:Number(id)
+    },
+    select:{
+        slug:true
+    },
+    orderBy:{slug: 'asc'}
+    })
+    res.json({
+        data:rooms
+    });
+});
+
+app.get("/closeroom/:slug")
 
 app.listen(3001);
