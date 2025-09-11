@@ -12,6 +12,7 @@ export default function  Dashboard() {
   const [disable,setdisable] = useState(false); 
   const [loading,setloading] = useState(true);
   const [rooms,setrooms] = useState<null | {slug:string}[]>(null)
+  const [userid,setuserid] = useState<number | null>(null)
 
   useEffect( ()=>{
     const checkauth =async()=>{
@@ -23,12 +24,14 @@ export default function  Dashboard() {
          const res = await axios.get("http://localhost:3001/verify-token",{
           headers: { Authorization: token },
         });
-        const userid =res.data.userId
+        const resid = res.data.userId
+        setuserid(resid)
         setloading(false)
-        if(userid){
-          const roomres = await axios.get(`http://localhost:3001/userRooms/${userid}`)
+        if(resid !== null){
+          const roomres = await axios.get(`http://localhost:3001/userRooms/${resid}`)
           if(roomres){
             setrooms(roomres.data.data);
+            
           }
         }
       }catch(e){
@@ -41,6 +44,7 @@ export default function  Dashboard() {
   },[router])
 
   const Createroom = async()=>{
+
     setdisable(true);
     try{
     const response = await axios.post("http://localhost:3001/create-room",{
@@ -50,6 +54,7 @@ export default function  Dashboard() {
       Authorization:localStorage.getItem("jwtToken")
     }
   });
+
      if (response.status === 200) {
       setdisable(false);
       router.push(`/canvas/${response.data}`)
@@ -68,7 +73,6 @@ export default function  Dashboard() {
      
          responsed = await axios.get(`http://localhost:3001/room/${value}`)
       }else{
-        console.log("reached input")
          responsed = await axios.get(`http://localhost:3001/room/${input}`)
       }
       if(responsed.data){
@@ -79,6 +83,13 @@ export default function  Dashboard() {
       setdisable(false);
       console.log(e);
     }
+  }
+  const deleteroom=async(slug:string)=>{
+    await axios.get(`http://localhost:3001/closeroom/${slug}`);
+    const roomres = await axios.get(`http://localhost:3001/userRooms/${userid}`)
+          if(roomres){
+            setrooms(roomres.data.data);
+          }
   }
 
   const logout=()=>{
@@ -96,7 +107,7 @@ export default function  Dashboard() {
         {loading === true ? <div className="text-white"> Checking authentication ... </div> :  <div className="flex flex-col w-[600px]  items-center h-full px-12 py-10">
                 <input placeholder="Enter room name" onChange={(e)=>setinput(e.target.value)} className="focus:outline-none focus:ring-0 h-[55px]  border-2 px-2 text-white border-white/10 w-full rounded-md" type="text" />
                 <div className="flex w-[300px] gap-2 justify-center items-center mt-4 ">
-                <Button btndisable={disable} btnfunction={()=>Createroom} btnscale={false} btnsize="medium" prop="blue" content={disable? "...":'create'}/>
+                <Button btndisable={disable} btnfunction={()=>Createroom()} btnscale={false} btnsize="medium" prop="blue" content={disable? "...":'create'}/>
                 <Button btndisable={disable} btnscale={false} btnfunction={()=>Joinroom()} btnsize="medium" prop="blue" content={disable?"...":"Join"}/>
                 </div>
                 <div className="flex items-start pl-2 mt-[10px] w-full ">
@@ -104,7 +115,7 @@ export default function  Dashboard() {
                 </div>
                 <div className="border-white/10 h-[400px] w-full border rounded-md mt-[10px] p-2 flex flex-col gap-2 overflow-y-scroll">
                 {rooms !== null && rooms.map((e:{slug:string})=>{
-                  return <Card key={e.slug} roomname={e.slug} joinfuntion={()=>Joinroom(e.slug)}/>
+                  return <Card key={e.slug} roomname={e.slug} joinfuntion={()=>Joinroom(e.slug)} deleterm={()=>deleteroom(e.slug)} />
                 })}
                 </div>
           </div> }

@@ -213,6 +213,7 @@ app.get("/verify-token", Middleware, (req, res) => {
 // show rooms created by user in frontend
 app.get("/userRooms/:id",async (req, res) => {
     const id = req.params.id
+    console.log(id)
     const rooms = await prismaClient.rooms.findMany({
     where:{
         adminId:Number(id)
@@ -222,11 +223,30 @@ app.get("/userRooms/:id",async (req, res) => {
     },
     orderBy:{slug: 'asc'}
     })
+    console.log(rooms)
     res.json({
         data:rooms
     });
 });
 
-app.get("/closeroom/:slug")
+app.get("/closeroom/:slug",async (req,res)=>{
+    const id = req.userid;
+    const slug = req.params.slug
+    try{
+       await prismaClient.rooms.deleteMany({
+            where:{
+                id:id,
+                slug:slug
+            }
+        })
+        res.json({
+            msg:"deleted the room"
+        })
+    }catch(e){
+        res.status(403).json({
+            msg:"some error to delete room"
+        })
+    }
+})
 
 app.listen(3001);

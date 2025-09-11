@@ -8,6 +8,8 @@ import { SiInstagram } from "react-icons/si";
 import { SlSocialTwitter } from "react-icons/sl";
 import { TbBrandLinkedin } from "react-icons/tb";
 import { Button } from "@/components/Button";
+import { useRouter } from "next/navigation";
+import axios from "axios";
 const mochiy = Mochiy_Pop_One({
   weight: "400", // only one weight available
   subsets: ["latin"],
@@ -21,7 +23,7 @@ const outfit = Outfit({
 });
 
 export default function Home(){
-
+      const router = useRouter()
     const parent ={
         initial:{opacity: 1},
         visible:{
@@ -45,6 +47,32 @@ export default function Home(){
     }
     }
 
+    const startBoard = async()=>{
+        const token = localStorage.getItem('jwtToken');
+        if(token){
+            const res = await axios.get("http://localhost:3001/verify-token",{
+            headers:{
+                Authorization:token
+            }
+            })
+            const id = res.data.userId;
+            if(id){ 
+                try{
+                const Roomres  = await axios.get(`http://localhost:3001/userRooms/${id}`)
+                const rooms  =Roomres.data.data
+                const lastroom = rooms[rooms.length - 1];
+                const roomidres  = await axios.get(`http://localhost:3001/room/${lastroom.slug}`)
+                const roomid = roomidres.data.id
+                router.push(`/canvas/${roomid}`);
+                }catch(e){
+                    console.log(e)
+                }
+            }
+        }else{
+            router.push("/Signin")
+        }
+    }
+
     return <>
   <div className="absolute top-[75px] left-0 w-full h-[1px] bg-gray-300 opacity-10"></div>
     <div className="absolute  left-[275px] w-[1px] h-[1701px] bg-gray-300 opacity-10"></div>
@@ -66,7 +94,7 @@ export default function Home(){
             </div>
             <div className="w-[135px]">
                 <Link rel="stylesheet" href="/Signup">
-            <Button btnscale={true} btnsize="small" prop="blue" content="SignUp"/>
+            <Button btnscale={true}  btnsize="small" prop="blue" content="SignUp"/>
                 </Link>
             </div>
         </div>
@@ -80,7 +108,7 @@ export default function Home(){
         <motion.h2 variants={child} className={`${outfit.className} text-[20px]`}>Collaborate live on the same canvas with anyone</motion.h2>
     </motion.div>
         <motion.div variants={child} className="mt-10 flex z-10 flex-col items-center">
-            <Button btnscale={true} btnsize="medium" prop="pink" content="Start board" />
+            <Button btnscale={true} btnsize="medium" btnfunction={()=>startBoard()} prop="pink" content="Start board" />
         </motion.div>
         <motion.div 
         variants={child}
