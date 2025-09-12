@@ -159,8 +159,8 @@ app.get("/chats/:slug",async (req,res)=>{
 
 app.get("/room/:slug",async(req,res)=>{
     const slug = req.params.slug;
-    console.log(slug)
-    const response = await prismaClient.rooms.findFirst({
+    try{
+        const response = await prismaClient.rooms.findFirst({
         where:{
             slug:slug
         },
@@ -169,14 +169,18 @@ app.get("/room/:slug",async(req,res)=>{
         }
     })
     if(!response){
-        res.status(404).json({
+        return res.status(404).json({
             msg:"no room of this name"
         })
     }
-    res.json({
+    return res.json({
         msg:"room found",
         id:response?.id
     })
+    }catch(e){
+        console.log(e)
+    }
+    
 
 })
 

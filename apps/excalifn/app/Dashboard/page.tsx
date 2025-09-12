@@ -1,7 +1,7 @@
 "use client"
 import { Button } from "@/components/Button";
 import { Card } from "@/components/Cards";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from "react";
 
@@ -13,7 +13,7 @@ export default function  Dashboard() {
   const [loading,setloading] = useState(true);
   const [rooms,setrooms] = useState<null | {slug:string}[]>(null)
   const [userid,setuserid] = useState<number | null>(null)
-
+  const [newerror,seterror]= useState<null | string>(null)
   useEffect( ()=>{
     const checkauth =async()=>{
       const token = localStorage.getItem("jwtToken")
@@ -77,11 +77,15 @@ export default function  Dashboard() {
       }
       if(responsed.data){
         setdisable(false);
+        setrooms(null)
         router.push(`/canvas/${responsed.data.id}`)
       }
     }catch(e){
-      setdisable(false);
-      console.log(e);
+      if (axios.isAxiosError(e)) {
+    seterror(e.response?.data?.msg || "Something went wrong");
+  } else {
+    console.error(e);
+  }
     }
   }
   const deleteroom=async(slug:string)=>{
@@ -110,8 +114,9 @@ export default function  Dashboard() {
                 <Button btndisable={disable} btnfunction={()=>Createroom()} btnscale={false} btnsize="medium" prop="blue" content={disable? "...":'create'}/>
                 <Button btndisable={disable} btnscale={false} btnfunction={()=>Joinroom()} btnsize="medium" prop="blue" content={disable?"...":"Join"}/>
                 </div>
-                <div className="flex items-start pl-2 mt-[10px] w-full ">
-                  <h1 className="text-white/40">Previous</h1>
+                <div className="flex items-start px-2 mt-[10px] w-full justify-between ">
+                  <h1 className="text-white/40">Previous</h1> 
+                  <h1 className="text-red-400/70">{newerror}</h1>
                 </div>
                 <div className="border-white/10 h-[400px] w-full border rounded-md mt-[10px] p-2 flex flex-col gap-2 overflow-y-scroll">
                 {rooms !== null && rooms.map((e:{slug:string})=>{

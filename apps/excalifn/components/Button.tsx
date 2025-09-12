@@ -12,13 +12,13 @@ type btntype={
 }
 export const Button=({prop,content,btnsize,btnscale,btndisable,btnfunction}:btntype)=>{
     const btnvairant ={
-        "blue":"flex flex-row justify-center items-center   text  bg-gradient-to-b from-[#2E00FF] to-[#13006C] drop-shadow-md  hover:from-[#0073ff] hover:to-[#003473] flex-none order-2 grow-0 transition duration-300",
-        "pink":"flex flex-row justify-center items-center relative bg-gradient-to-b from-[#D800FF] to-[#8E009B] drop-shadow-md  z-10 shadow-[0_0_20px_rgba(216,0,255,0.7)] flex-none order-2 grow-0 text-xl font-medium text-shadow-white border-b-[1px] border-r border-l border-white hover:from-[#d94fff] hover:to-[#ff4ffc] transition duration-300"
+        "blue":"flex flex-row justify-center items-center bg-gradient-to-b from-[#2E00FF] to-[#13006C] drop-shadow-md  hover:from-[#0073ff] hover:to-[#003473] flex-none order-2 grow-0 transition duration-300",
+        "pink":"flex flex-row justify-center items-center relative bg-gradient-to-b from-[#D800FF] to-[#8E009B] drop-shadow-md  z-10 shadow-[0_0_20px_rgba(216,0,255,0.7)] flex-none order-2 grow-0 font-medium text-shadow-white border-b-[1px] border-r border-l border-white hover:from-[#d94fff] hover:to-[#ff4ffc] transition duration-300"
     }
     const size ={
-        "small":"w-[100px] h-[30px] p-[18px] rounded-[15px] ",
-        "medium":" p-[10px] w-[245px] h-[42px] rounded-[4px]",
-        "larger":"w-[300px] h-[42px] rounded-[4px] "
+        "small":"w-[100px] h-[30px] p-[18px] rounded-[15px] text-sm ",
+        "medium":"rounded-[12px] text-lg md:text-md w-[125px] h-[35px] p-[5px] md:p-[10px] md:w-[245px] md:h-[42px] ",
+        "larger":"w-[300px] h-[42px] rounded-[4px] text-xl "
     }
 
     return (

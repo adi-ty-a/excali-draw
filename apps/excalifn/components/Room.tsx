@@ -5,15 +5,12 @@ import axios from "axios";
 export function Roomcanvas({roomid}:{
     roomid:string
 }){
-
     const [socket,setsocket] = useState<WebSocket>()
     const [slug,setslug] =  useState("");
     useEffect(()=>{
         axios.get(`http://localhost:3001/slug/${roomid}`).then((e)=>{
             setslug(e.data.slug)
-             
         })
-       
         const ws = new WebSocket(`ws://localhost:8090?token=${localStorage.getItem("jwtToken")}`);
         ws.onopen =()=>{
             setsocket(ws);
