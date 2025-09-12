@@ -47,8 +47,9 @@ export default function  Dashboard() {
 
     setdisable(true);
     try{
+      const slugifiedInput = input.trim().replace(/\s+/g, "-");
     const response = await axios.post("http://localhost:3001/create-room",{
-    name:input
+    name:slugifiedInput
     },{
     headers: {
       Authorization:localStorage.getItem("jwtToken")
