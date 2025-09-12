@@ -28,7 +28,7 @@ export default function Signup() {
   const {register,handleSubmit,setError ,formState: { errors,isSubmitting }} = useForm<form>();
   const onsubmit: SubmitHandler<form> =async(data)=>{
     try{
-      const response = await axios.post("http://localhost:3001/signUp",{
+      const response = await axios.post(process.env.HTTP_URL+"/signUp",{
         username:data.name,
         password:data.password,
         email:data.email

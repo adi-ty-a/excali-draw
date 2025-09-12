@@ -8,10 +8,10 @@ export function Roomcanvas({roomid}:{
     const [socket,setsocket] = useState<WebSocket>()
     const [slug,setslug] =  useState("");
     useEffect(()=>{
-        axios.get(`http://localhost:3001/slug/${roomid}`).then((e)=>{
+        axios.get(`${process.env.HTTP_URL}/slug/${roomid}`).then((e)=>{
             setslug(e.data.slug)
         })
-        const ws = new WebSocket(`ws://localhost:8090?token=${localStorage.getItem("jwtToken")}`);
+        const ws = new WebSocket(`${process.env.WS_URL}?token=${localStorage.getItem("jwtToken")}`);
         ws.onopen =()=>{
             setsocket(ws);
             ws.send(JSON.stringify({

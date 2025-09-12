@@ -365,7 +365,7 @@ function clearcanvas(exisitingshapes:shapes[], canvas:HTMLCanvasElement ,ctx:Can
 }
 
 async function  getExistingshapes(roomId : string){
-    const res = await axios.get(`http://localhost:3001/chats/${roomId}`);
+    const res = await axios.get(`${process.env.HTTP_URL}/chats/${roomId}`);
     
     if(!res.data){
         return []
