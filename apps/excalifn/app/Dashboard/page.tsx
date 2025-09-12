@@ -21,14 +21,14 @@ export default function  Dashboard() {
         router.push('/Signin')
       }
       try{
-         const res = await axios.get(process.env.HTTP_URL+"/verify-token",{
+         const res = await axios.get(process.env.NEXT_PUBLIC_HTTP_URL+"/verify-token",{
           headers: { Authorization: token },
         });
         const resid = res.data.userId
         setuserid(resid)
         setloading(false)
         if(resid !== null){
-          const roomres = await axios.get(`${process.env.HTTP_URL}/userRooms/${resid}`)
+          const roomres = await axios.get(`${process.env.NEXT_PUBLIC_HTTP_URL}/userRooms/${resid}`)
           if(roomres){
             setrooms(roomres.data.data);
             
@@ -48,7 +48,7 @@ export default function  Dashboard() {
     setdisable(true);
     try{
       const slugifiedInput = input.trim().replace(/\s+/g, "-");
-    const response = await axios.post(process.env.HTTP_URL+"/create-room",{
+    const response = await axios.post(process.env.NEXT_PUBLIC_HTTP_URL+"/create-room",{
     name:slugifiedInput
     },{
     headers: {
@@ -72,9 +72,9 @@ export default function  Dashboard() {
       let responsed =null
       if(value !== undefined){ 
      
-         responsed = await axios.get(`${process.env.HTTP_URL}/room/${value}`)
+         responsed = await axios.get(`${process.env.NEXT_PUBLIC_HTTP_URL}/room/${value}`)
       }else{
-         responsed = await axios.get(`${process.env.HTTP_URL}/room/${input}`)
+         responsed = await axios.get(`${process.env.NEXT_PUBLIC_HTTP_URL}/room/${input}`)
       }
       if(responsed.data){
         setdisable(false);
@@ -90,8 +90,8 @@ export default function  Dashboard() {
     }
   }
   const deleteroom=async(slug:string)=>{
-    await axios.get(`${process.env.HTTP_URL}/closeroom/${slug}`);
-    const roomres = await axios.get(`${process.env.HTTP_URL}/userRooms/${userid}`)
+    await axios.get(`${process.env.NEXT_PUBLIC_HTTP_URL}/closeroom/${slug}`);
+    const roomres = await axios.get(`${process.env.NEXT_PUBLIC_HTTP_URL}/userRooms/${userid}`)
           if(roomres){
             setrooms(roomres.data.data);
           }

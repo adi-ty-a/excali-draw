@@ -58,10 +58,10 @@ export default function Home(){
             const id = res.data.userId;
             if(id){ 
                 try{
-                const Roomres  = await axios.get(`${process.env.HTTP_URL}/userRooms/${id}`)
+                const Roomres  = await axios.get(`${process.env.NEXT_PUBLIC_HTTP_URL}/userRooms/${id}`)
                 const rooms  =Roomres.data.data
                 const lastroom = rooms[rooms.length - 1];
-                const roomidres  = await axios.get(`${process.env.HTTP_URL}/room/${lastroom.slug}`)
+                const roomidres  = await axios.get(`${process.env.NEXT_PUBLIC_HTTP_URL}/room/${lastroom.slug}`)
                 const roomid = roomidres.data.id
                 router.push(`/canvas/${roomid}`);
                 }catch(e){
