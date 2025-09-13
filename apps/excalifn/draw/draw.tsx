@@ -1,3 +1,4 @@
+import { http } from "@/components/endpoints";
 import axios from "axios"
 import { RefObject } from "react";
 
@@ -365,7 +366,7 @@ function clearcanvas(exisitingshapes:shapes[], canvas:HTMLCanvasElement ,ctx:Can
 }
 
 async function  getExistingshapes(roomId : string){
-    const res = await axios.get(`http://playboard.byadi.me/api/chats/${roomId}`);
+    const res = await axios.get(`${http}/chats/${roomId}`);
     
     if(!res.data){
         return []

@@ -1,6 +1,7 @@
 "use client"
 import { Button } from "@/components/Button";
 import { Card } from "@/components/Cards";
+import { http } from "@/components/endpoints";
 import axios, { AxiosError } from "axios";
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from "react";
@@ -21,14 +22,14 @@ export default function  Dashboard() {
         router.push('/Signin')
       }
       try{
-         const res = await axios.get("http://playboard.byadi.me/api/verify-token",{
+         const res = await axios.get(http+"/verify-token",{
           headers: { Authorization: token },
         });
         const resid = res.data.userId
         setuserid(resid)
         setloading(false)
         if(resid !== null){
-          const roomres = await axios.get(`http://playboard.byadi.me/api/userRooms/${resid}`)
+          const roomres = await axios.get(`${http}/userRooms/${resid}`)
           if(roomres){
             setrooms(roomres.data.data);
             
@@ -48,7 +49,7 @@ export default function  Dashboard() {
     setdisable(true);
     try{
       const slugifiedInput = input.trim().replace(/\s+/g, "-");
-    const response = await axios.post("http://playboard.byadi.me/api/create-room",{
+    const response = await axios.post(http+"/create-room",{
     name:slugifiedInput
     },{
     headers: {
@@ -72,9 +73,9 @@ export default function  Dashboard() {
       let responsed =null
       if(value !== undefined){ 
      
-         responsed = await axios.get(`http://playboard.byadi.me/api/room/${value}`)
+         responsed = await axios.get(`${http}/room/${value}`)
       }else{
-         responsed = await axios.get(`http://playboard.byadi.me/api/room/${input}`)
+         responsed = await axios.get(`${http}/room/${input}`)
       }
       if(responsed.data){
         setdisable(false);
@@ -90,8 +91,8 @@ export default function  Dashboard() {
     }
   }
   const deleteroom=async(slug:string)=>{
-    await axios.get(`${process.env.HTTP_URL}/closeroom/${slug}`);
-    const roomres = await axios.get(`http://playboard.byadi.me/api/userRooms/${userid}`)
+    await axios.get(`${http}/closeroom/${slug}`);
+    const roomres = await axios.get(`${http}/userRooms/${userid}`)
           if(roomres){
             setrooms(roomres.data.data);
           }

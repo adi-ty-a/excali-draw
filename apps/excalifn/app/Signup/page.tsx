@@ -5,6 +5,7 @@ import { Mochiy_Pop_One, Outfit } from "next/font/google";
 import {useForm ,SubmitHandler } from "react-hook-form"
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { http } from "@/components/endpoints";
 const mochiy = Mochiy_Pop_One({
   weight: "400", // only one weight available
   subsets: ["latin"],
@@ -28,7 +29,7 @@ export default function Signup() {
   const {register,handleSubmit,setError ,formState: { errors,isSubmitting }} = useForm<form>();
   const onsubmit: SubmitHandler<form> =async(data)=>{
     try{
-      const response = await axios.post("http://playboard.byadi.me/api/signUp",{
+      const response = await axios.post(http+"/signUp",{
         username:data.name,
         password:data.password,
         email:data.email

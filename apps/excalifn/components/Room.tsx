@@ -2,16 +2,17 @@
 import { useEffect, useState } from "react";
 import { Canvaspage } from "./Canvas";
 import axios from "axios";
+import {http, wslink} from "./endpoints";
 export function Roomcanvas({roomid}:{
     roomid:string
 }){
     const [socket,setsocket] = useState<WebSocket>()
     const [slug,setslug] =  useState("");
     useEffect(()=>{
-        axios.get(`http://playboard.byadi.me/api/slug/${roomid}`).then((e)=>{
+        axios.get(`${http}/slug/${roomid}`).then((e)=>{
             setslug(e.data.slug)
         })
-        const ws = new WebSocket(`http://playboard.byadi.me/ws?token=${localStorage.getItem("jwtToken")}`);
+        const ws = new WebSocket(`${wslink}?token=${localStorage.getItem("jwtToken")}`);
         ws.onopen =()=>{
             setsocket(ws);
             ws.send(JSON.stringify({

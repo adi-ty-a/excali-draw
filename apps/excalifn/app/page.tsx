@@ -10,8 +10,9 @@ import { TbBrandLinkedin } from "react-icons/tb";
 import { Button } from "@/components/Button";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { http } from "@/components/endpoints";
 const mochiy = Mochiy_Pop_One({
-  weight: "400", // only one weight available
+  weight: "400", 
   subsets: ["latin"],
   variable: "--font-mochiy",
 });
@@ -19,7 +20,7 @@ const mochiy = Mochiy_Pop_One({
 const outfit = Outfit({
   subsets: ["latin"],
    weight: ["300","700"],
-  variable: "--font-outfit", // optional CSS variable
+  variable: "--font-outfit", 
 });
 
 export default function Home(){
@@ -50,7 +51,7 @@ export default function Home(){
     const startBoard = async()=>{
         const token = localStorage.getItem('jwtToken');
         if(token){
-            const res = await axios.get(process.env.HTTP_URL+"/verify-token",{
+            const res = await axios.get(http+"/verify-token",{
             headers:{
                 Authorization:token
             }
@@ -58,10 +59,10 @@ export default function Home(){
             const id = res.data.userId;
             if(id){ 
                 try{
-                const Roomres  = await axios.get(`${process.env.NEXT_PUBLIC_HTTP_URL}/userRooms/${id}`)
+                const Roomres  = await axios.get(`${http}/userRooms/${id}`)
                 const rooms  =Roomres.data.data
                 const lastroom = rooms[rooms.length - 1];
-                const roomidres  = await axios.get(`${process.env.NEXT_PUBLIC_HTTP_URL}/room/${lastroom.slug}`)
+                const roomidres  = await axios.get(`${http}/room/${lastroom.slug}`)
                 const roomid = roomidres.data.id
                 router.push(`/canvas/${roomid}`);
                 }catch(e){

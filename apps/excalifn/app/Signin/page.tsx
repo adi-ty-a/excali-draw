@@ -5,6 +5,7 @@ import { Mochiy_Pop_One, Outfit } from "next/font/google";
 import {useForm ,SubmitHandler } from "react-hook-form"
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { http } from "@/components/endpoints";
 
 
 const mochiy = Mochiy_Pop_One({
@@ -30,8 +31,8 @@ export default function Signup() {
 
   const {register,handleSubmit,setError, formState: { errors,isSubmitting }} = useForm<form>();
   const onsubmit: SubmitHandler<form> = async(data)=>{
-try{
-      const response = await axios.post("http://playboard.byadi.me/api/signIn",{
+  try{
+      const response = await axios.post(http+"/signIn",{
         password:data.password,
         email:data.email
       })
@@ -39,7 +40,6 @@ try{
         localStorage.setItem('jwtToken', response.data.token);
         router.push('/Dashboard')
       }
-
     }catch(e){
       console.log(e);
     }
