@@ -4,7 +4,7 @@ import { Button } from "@/components/Button";
 import { Mochiy_Pop_One, Outfit } from "next/font/google";
 import {useForm ,SubmitHandler } from "react-hook-form"
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import axios, { AxiosError, isAxiosError } from "axios";
 import { http } from "@/components/endpoints";
 const mochiy = Mochiy_Pop_One({
   weight: "400", // only one weight available
@@ -23,14 +23,14 @@ export default function Signup() {
   type form={
     email:string,
     password:string,
-    name:string
+    username:string
   }
 
   const {register,handleSubmit,setError ,formState: { errors,isSubmitting }} = useForm<form>();
   const onsubmit: SubmitHandler<form> =async(data)=>{
     try{
       const response = await axios.post(http+"/signUp",{
-        username:data.name,
+        username:data.username,
         password:data.password,
         email:data.email
       })
@@ -39,9 +39,22 @@ export default function Signup() {
         router.push('/Signin')
         console.log("account created")
       }
-    }catch(e){
-      setError("email",{message:"Email already exist!"})
+    }catch (err) {
+  if (axios.isAxiosError(err)) {
+    const msgs = err.response?.data?.msg?.message[0].path; 
+console.log(msgs)
+    if (Array.isArray(msgs)) {
+      msgs.forEach((m: any) => {
+        
+        setError(m.path[0] as "username" | "email" | "password", {
+          message: m.message,
+        });
+      });
     }
+  } else {
+    console.error(err);
+  }
+}
   }
 
   return <div className="w-full h-screen bg-gradient-to-b from-[#120066] from-[-54.58%] to-black">
@@ -53,11 +66,11 @@ export default function Signup() {
             <form onSubmit={handleSubmit(onsubmit)}>
               <div>
                 <h2 className={`${outfit.className} mb-2`}> Name</h2>
-                <input {...register("name",{
+                <input {...register("username",{
                 required:"name is required",
-                minLength:{value:3,message:"atleast 3 character long"}})} 
+                minLength:{value:5,message:"atleast 5 character long"}})} 
                 className="h-[42px] bg-[#0E033F] border-2 px-2 text-white border-[#2B316D] w-[300px] rounded-md" type="text" />
-                {errors.name && <h2 className="text-red-400">{errors.name.message}</h2>}
+                {errors.username && <h2 className="text-red-400">{errors.username.message}</h2>}
             </div>
             <div>
                 <h2 className={`${outfit.className} mb-2`}>Email Address</h2>

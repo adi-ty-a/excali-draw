@@ -16,10 +16,11 @@ app.post("/signUp",async(req,res)=>{
 
     const zodvalidation = CreateUserSchema.safeParse(req.body);
     if(!zodvalidation.success){
-        res.status(403).json({
-            msg:"invalid inputs"
-        })
-        return
+        const error  = zodvalidation.error
+        if(error.issues[0]){
+        res.status(403).send(error.issues[0].message )
+                return
+        }   
     }else{
         const {username,password,email}  =req.body;
         const hash = bcrypt.hashSync(password, saltRounds);
@@ -44,7 +45,6 @@ app.post("/signUp",async(req,res)=>{
          return res.status(500).json({
         error: "Something went wrong, please try again later"
   });
-    return
     }
     }
     
@@ -138,7 +138,7 @@ app.get("/chats/:roomId",async (req,res)=>{
 
 app.get("/chats/:slug",async (req,res)=>{
     const slug = req.params.slug
-    const roomid = prismaClient.rooms.findFirst({
+    const roomid =await prismaClient.rooms.findFirst({
         where:{
             slug
         },
