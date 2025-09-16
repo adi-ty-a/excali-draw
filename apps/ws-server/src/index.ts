@@ -128,11 +128,15 @@ wss.on('connection', function connection(ws,request) {
     })
   }
    if(parsedData.type == "delete_shape"){
-    const roomId = parsedData.roomId
-    const shapid = parsedData.shapetoease
+    const roomId = Number(parsedData.roomId)
+    const shapid = Number(parsedData.id)
     const roomno = Number(roomId)
+     if (!shapid) {
+    console.log("Invalid shape id, skipping delete");
+    return;
+  }
     console.log(parsedData)
-    await prismaClient.chat.delete({
+    await prismaClient.chat.deleteMany({
       where:{
         id:shapid
       }

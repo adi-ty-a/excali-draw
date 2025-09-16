@@ -29,7 +29,7 @@ export default function Signup() {
     password:string
   }
 
-  const {register,handleSubmit,setError, formState: { errors,isSubmitting }} = useForm<form>();
+  const {register,handleSubmit, formState: { errors,isSubmitting }} = useForm<form>();
   const onsubmit: SubmitHandler<form> = async(data)=>{
   try{
       const response = await axios.post(http+"/signIn",{

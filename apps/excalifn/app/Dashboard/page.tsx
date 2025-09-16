@@ -2,7 +2,7 @@
 import { Button } from "@/components/Button";
 import { Card } from "@/components/Cards";
 import { http } from "@/components/endpoints";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from "react";
 
@@ -38,6 +38,7 @@ export default function  Dashboard() {
       }catch(e){
         localStorage.removeItem("jwtToken");
         router.push("/")
+        console.log(e)
       }
     }
     checkauth()

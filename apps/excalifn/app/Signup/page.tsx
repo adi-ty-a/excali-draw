@@ -4,13 +4,22 @@ import { Button } from "@/components/Button";
 import { Mochiy_Pop_One, Outfit } from "next/font/google";
 import {useForm ,SubmitHandler } from "react-hook-form"
 import { useRouter } from "next/navigation";
-import axios, { AxiosError, isAxiosError } from "axios";
+import axios from "axios";
 import { http } from "@/components/endpoints";
 const mochiy = Mochiy_Pop_One({
   weight: "400", // only one weight available
   subsets: ["latin"],
   variable: "--font-mochiy",
 });
+
+type m = {
+  origin: string;
+  code: string;
+  minimum?: number;
+  inclusive?: boolean;
+  path: string[];
+  message: string;
+};
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -44,7 +53,7 @@ export default function Signup() {
     const msgs = err.response?.data?.msg?.message[0].path; 
 console.log(msgs)
     if (Array.isArray(msgs)) {
-      msgs.forEach((m: any) => {
+      msgs.forEach((m: m) => {
         
         setError(m.path[0] as "username" | "email" | "password", {
           message: m.message,

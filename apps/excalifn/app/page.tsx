@@ -2,7 +2,7 @@
 import { Mochiy_Pop_One,Outfit } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, scale, stagger } from "motion/react"
+import { motion } from "motion/react"
 import picture from "../assets/Playboard.svg"
 import { FaGithub } from "react-icons/fa";
 import { SlSocialTwitter } from "react-icons/sl";

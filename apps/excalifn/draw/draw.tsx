@@ -67,12 +67,10 @@ export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,
                 clearcanvas(existing,canvas,ctx,circleshandles,selectedShapeId)  
             }
             else if (message.type == "delete_shape"){
-                const easeshapeid = JSON.parse(message.id)
+                const easeshapeid = (message.id);
                 const index = existing.findIndex(e => e.id == easeshapeid);
                 if(index !== -1){
-                    console.log(existing)
                     existing.splice(index,1)
-                    console.log(existing)
                 }
                 if (selectedShapeId === easeshapeid) {
                     selectedShapeId = null;
@@ -238,9 +236,10 @@ export default async function  intindraw(canvas:HTMLCanvasElement,roomId:string,
                 }
             }
             else if(tool.current =="erase" && shapetoease !==0 ){
+                    const id = shapetoease;
                      WebSocket.send(JSON.stringify({
                        type:"delete_shape",
-                       shapetoease,
+                       id,
                        roomId
                     }));
                     shapetoease=0
