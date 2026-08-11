@@ -45,6 +45,7 @@ export default function Signup() {
       })
 
       if(response.data.msg == 'signedup'){
+        console.log(response);
         router.push('/Signin')
         console.log("account created")
       }
