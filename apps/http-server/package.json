@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "npm run build && npm run start",
-    "build": "pnpm prisma generate && tsc -b",
+    "build": "tsc -b",
     "start": "node ./dist/index.js"
   },
   "keywords": [],
