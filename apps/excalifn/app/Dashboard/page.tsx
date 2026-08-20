@@ -8,16 +8,16 @@ import { useEffect, useState } from "react";
 import { Mochiy_Pop_One, Outfit } from "next/font/google";
 import Link from "next/link";
 import { motion } from "motion/react";
-import { 
-  HiOutlinePencilSquare, 
-  HiOutlineArrowLeftOnRectangle, 
-  HiOutlinePlus, 
+import {
+  HiOutlinePencilSquare,
+  HiOutlineArrowLeftOnRectangle,
+  HiOutlinePlus,
   HiOutlineArrowRight,
   HiOutlineFolderOpen
 } from "react-icons/hi2";
 
 const mochiy = Mochiy_Pop_One({
-  weight: "400", 
+  weight: "400",
   subsets: ["latin"],
   variable: "--font-mochiy",
 });
@@ -25,13 +25,13 @@ const mochiy = Mochiy_Pop_One({
 const outfit = Outfit({
   subsets: ["latin"],
   weight: ["300", "500", "700"],
-  variable: "--font-outfit", 
+  variable: "--font-outfit",
 });
 
 export default function Dashboard() {
   const [input, setinput] = useState("");
   const router = useRouter();
-  const [disable, setdisable] = useState(false); 
+  const [disable, setdisable] = useState(false);
   const [loading, setloading] = useState(true);
   const [rooms, setrooms] = useState<null | { slug: string }[]>(null);
   const [userid, setuserid] = useState<number | null>(null);
@@ -83,6 +83,11 @@ export default function Dashboard() {
         }
       });
       if (response.status === 200) {
+        if (response.data.status == false) {
+          setdisable(false);
+          seterror("enter a unique RoomName");
+          return
+        }
         setdisable(false);
         router.push(`/canvas/${response.data}`);
       }
@@ -144,7 +149,7 @@ export default function Dashboard() {
     <div className={`min-h-screen w-full bg-black text-white relative overflow-x-hidden ${outfit.className}`}>
       {/* Background continuous ambient gradient */}
       <div className="absolute inset-0  w-full h-full bg-gradient-to-b from-[#0d001f] via-[#090033] to-black"></div>
-      
+
       {/* Background grid lines */}
       <div className="absolute top-[10vh] left-0 w-full h-[1px] bg-gray-300 opacity-10 z-0"></div>
       <div className="absolute left-[5vw] md:left-[15vw] w-[1px] h-full bg-gray-300 opacity-10 z-0"></div>
@@ -163,7 +168,7 @@ export default function Dashboard() {
           </span>
         </div>
 
-        <button 
+        <button
           onClick={logout}
           className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-950/40 hover:bg-red-500/10 border border-blue-500/20 hover:border-red-500/30 text-gray-300 hover:text-red-400 text-sm font-medium transition-all duration-200 cursor-pointer"
         >
@@ -174,14 +179,14 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-6 py-12 relative z-10">
-        
+
         {loading ? (
           <div className="w-full py-24 flex flex-col items-center justify-center gap-4">
             <div className="w-8 h-8 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" />
             <p className="text-gray-400 text-sm">Authenticating dashboard...</p>
           </div>
         ) : (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
@@ -204,7 +209,7 @@ export default function Dashboard() {
               </label>
 
               <div className="flex flex-col sm:flex-row gap-3">
-                <input 
+                <input
                   id="room-input"
                   placeholder="Enter room name (e.g. project-brainstorm)"
                   value={input}
@@ -220,7 +225,7 @@ export default function Dashboard() {
                 />
 
                 <div className="flex gap-2.5 sm:flex-none">
-                  <button 
+                  <button
                     disabled={disable}
                     onClick={() => Createroom()}
                     className="flex-1 sm:flex-none px-5 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-sm font-medium flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-purple-500/20 disabled:opacity-50 cursor-pointer"
@@ -229,7 +234,7 @@ export default function Dashboard() {
                     <span>{disable ? "Working..." : "Create"}</span>
                   </button>
 
-                  <button 
+                  <button
                     disabled={disable}
                     onClick={() => Joinroom()}
                     className="flex-1 sm:flex-none px-5 py-3 rounded-xl bg-blue-950/80 hover:bg-blue-900/80 border border-blue-700/50 text-blue-200 hover:text-white text-sm font-medium flex items-center justify-center gap-2 transition-all disabled:opacity-50 cursor-pointer"
@@ -274,11 +279,11 @@ export default function Dashboard() {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {rooms.map((e: { slug: string }) => (
-                    <Card 
-                      key={e.slug} 
-                      roomname={e.slug} 
-                      joinfuntion={() => Joinroom(e.slug)} 
-                      deleterm={() => deleteroom(e.slug)} 
+                    <Card
+                      key={e.slug}
+                      roomname={e.slug}
+                      joinfuntion={() => Joinroom(e.slug)}
+                      deleterm={() => deleteroom(e.slug)}
                     />
                   ))}
                 </div>
