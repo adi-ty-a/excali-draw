@@ -134,7 +134,7 @@ export default function Home() {
               </motion.h1>
               <motion.h2 
                 variants={child} 
-                className={`${outfit.className} text-lg sm:text-xl md:text-2xl text-gray-300 mt-4 max-w-2xl font-light`}
+                className={`${outfit.className} text-lg sm:text-xl md:text-2xl text-gray-300 mt-4 max-w-2xl font-light relative z-10`}
               >
                 Collaborate live on the same canvas with anyone, anywhere.
               </motion.h2>
