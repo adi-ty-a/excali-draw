@@ -83,13 +83,14 @@ export default function Dashboard() {
         }
       });
       if (response.status === 200) {
-        if (response.data.status == false) {
+        if (response.data.status === false) {
           setdisable(false);
           seterror("enter a unique RoomName");
-          return
+          return;
         }
         setdisable(false);
-        router.push(`/canvas/${response.data}`);
+        const roomId = response.data.roomId || response.data.id || response.data;
+        router.push(`/canvas/${roomId}`);
       }
     } catch (e) {
       setdisable(false);
@@ -128,7 +129,11 @@ export default function Dashboard() {
 
   const deleteroom = async (slug: string) => {
     try {
-      await axios.get(`${http}/closeroom/${slug}`);
+      await axios.get(`${http}/closeroom/${slug}`, {
+        headers: {
+          Authorization: localStorage.getItem("jwtToken")
+        }
+      });
       if (userid !== null) {
         const roomres = await axios.get(`${http}/userRooms/${userid}`);
         if (roomres) {
